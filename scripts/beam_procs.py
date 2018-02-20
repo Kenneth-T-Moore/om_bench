@@ -32,12 +32,12 @@ class BeamBench(Bench):
 if __name__ == "__main__":
 
     desvars = [1]
-    states = [1, 5, 10, 50]
-    procs = [1]
+    states = [1]
+    procs = [1, 2, 4]
 
     bench = BeamBench(desvars, states, procs, name='beam')
 
-    bench.run_benchmark()
+    bench.run_benchmark_mpi()
 
 
 

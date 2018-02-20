@@ -3,12 +3,17 @@ Class that assists with generating scaling benchmarking data for OpenMDAO models
 """
 from six import iteritems
 from six.moves import range
+from collections import Iterable
 import os
+import sys
 from time import time
 
 import numpy as np
 
-from openmdao.api import Problem
+from openmdao.api import Problem, PETScVector, DefaultVector
+from openmdao.utils.mpi import MPI
+
+from om_bench.templates import qsub_template, run_template
 
 
 class Bench(object):
@@ -17,6 +22,13 @@ class Bench(object):
         """
         Initialize the benchmark assistant class.
         """
+        if not isinstance(desvars, Iterable):
+            desvars = [desvars]
+        if not isinstance(states, Iterable):
+            states = [states]
+        if not isinstance(procs, Iterable):
+            procs = [procs]
+
         ndv = len(desvars)
         nstate = len(states)
         nproc = len(procs)
@@ -80,7 +92,7 @@ class Bench(object):
 
         # This method only supports single proc.
         if len(procs) > 1 or procs[0] > 1:
-            msg = 'This method only supports a single proc. Use (the other method).'
+            msg = 'This method only supports a single proc. Use run_benchmark_mpi instead.'
             raise RuntimeError(msg)
 
         data = []
@@ -136,7 +148,33 @@ class Bench(object):
             outfile.write('\n')
         outfile.close()
 
-    def _run_nl_ln_drv(self, ndv, nstate, nproc):
+    def run_benchmark_mpi(self, walltime=4):
+        """
+        Create and submit jobs that run benchmarks and save data.
+        """
+        self.walltime = walltime
+
+        desvars = self.desvars
+        states = self.states
+        procs = self.procs
+
+        data = []
+
+        for nproc in procs:
+            for nstate in states:
+                for ndv in desvars:
+                    for j in range(self.num_averages):
+
+                        # Prepare python code
+                        self._prepare_run_script(nproc, nstate, ndv, j)
+
+                        # Prepare job submission file
+                        self._prepare_pbs_job(nproc, nstate, ndv, j)
+
+                        # Submit job
+                        pass
+
+    def _run_nl_ln_drv(self, ndv, nstate, nproc, use_mpi=False):
         """
         Benchmark a single point.
 
@@ -147,7 +185,8 @@ class Bench(object):
         # User hook pre setup
         self.setup(prob, ndv, nstate, nproc)
 
-        prob.setup()
+        vector_class = PETScVector if use_mpi else DefaultVector
+        prob.setup(vector_class=vector_class)
 
         # User hook post setup
         self.post_setup(prob, ndv, nstate, nproc)
@@ -179,3 +218,45 @@ class Bench(object):
         self.post_run()
 
         return t1, t3, t5
+
+    def _prepare_run_script(self, ndv, nstate, nproc, average):
+        """
+        Output run script for mpi submission using template.
+        """
+        tp = run_template
+        tp = tp.replace('<ndv>', str(ndv))
+        tp = tp.replace('<nstate>', str(nstate))
+        tp = tp.replace('<nproc>', str(nproc))
+        tp = tp.replace('<average>', str(average))
+
+        # We need to import from the file that is running.
+        module = sys.argv[0].split('/')[-1].strip('.py')
+        classname = self.__class__.__name__
+        tp = tp.replace('<module>', module)
+        tp = tp.replace('<classname>', classname)
+        tp = tp.replace('<name>', self.name)
+        tp = tp.replace('<time_linear>', str(self.time_linear))
+        tp = tp.replace('<time_driver>', str(self.time_driver))
+
+        outname = '_%s_%d_%d_%d_%d.py' % (self.name, ndv, nstate, nproc, average)
+        outfile = open(outname, 'w')
+        outfile.write(tp)
+        outfile.close()
+
+    def _prepare_pbs_job(self, ndv, nstate, nproc, average):
+        """
+        Output PBS run submission file using template.
+        """
+        tp = qsub_template
+        name = '_%s_%d_%d_%d_%d' % (self.name, ndv, nstate, nproc, average)
+
+        tp = tp.replace('<name>', name)
+        tp = tp.replace('<walltime>', str(self.walltime))
+
+        local = os.getcwd()
+        tp = tp.replace('<local>', local)
+
+        outname = '%s.sh' % name
+        outfile = open(outname, 'w')
+        outfile.write(tp)
+        outfile.close()
