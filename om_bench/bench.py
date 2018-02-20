@@ -1,6 +1,7 @@
 """
 Class that assists with generating scaling benchmarking data for OpenMDAO models.
 """
+from six import iteritems
 from six.moves import range
 import os
 from time import time
@@ -38,7 +39,7 @@ class Bench(object):
 
         # Options
         self.num_averages = 5
-        self.time_nonlinear = False
+        self.time_nonlinear = True
         self.time_linear = True
         self.time_driver = False
 
@@ -60,6 +61,15 @@ class Bench(object):
         """
         pass
 
+
+    def post_run(self, problem):
+        """
+        Perform any post benchmark activities, like testing the result.
+
+        This method is overriden by the user.
+        """
+        pass
+
     def run_benchmark(self):
         """
         Run benchmarks and save data.
@@ -68,34 +78,65 @@ class Bench(object):
         states = self.states
         procs = self.procs
 
-        data = {}
+        # This method only supports single proc.
+        if len(procs) > 1 or procs[0] > 1:
+            msg = 'This method only supports a single proc. Use (the other method).'
+            raise RuntimeError(msg)
 
-        for nproc in procs:
-            for nstate in states:
-                for ndv in desvars:
+        data = []
 
-                    print("\n")
-                    print('Running: dv=%d, state=%d, proc=%d' % (ndv, nstate, nproc))
-                    print("\n")
+        nproc = 1
+        for nstate in states:
+            for ndv in desvars:
 
-                    t1_sum = 0.0
-                    t3_sum = 0.0
-                    t5_sum = 0.0
-                    for j in range(self.num_averages):
-                        t1, t3, t5 = self._run_nl_ln_dr(ndv, nstate, nproc)
-                        t1_sum += t1
-                        t3_sum += t3
-                        t5_sum += t5
+                print("\n")
+                print('Running: dv=%d, state=%d, proc=%d' % (ndv, nstate, nproc))
+                print("\n")
 
-                    t1_av = t1_sum / (j + 1)
-                    t3_av = t3_sum / (j + 1)
-                    t5_av = t5_sum / (j + 1)
+                t1_sum = 0.0
+                t3_sum = 0.0
+                t5_sum = 0.0
+                for j in range(self.num_averages):
+                    t1, t3, t5 = self._run_nl_ln_drv(ndv, nstate, nproc)
+                    t1_sum += t1
+                    t3_sum += t3
+                    t5_sum += t5
 
-                    data[ndv, nstate, nproc] = (t1_av, t3_av, t5_av)
+                t1_av = t1_sum / (j + 1)
+                t3_av = t3_sum / (j + 1)
+                t5_av = t5_sum / (j + 1)
+
+                data.append((ndv, nstate, nproc, t1_av, t3_av, t5_av))
 
         os.chdir(self.base_dir)
 
-    def _run_nl_ln_dr(self, ndv, nstate, nproc):
+        name = self.name
+        mode = self.mode
+        op = []
+        if self.time_nonlinear:
+            op.append('nl')
+        if self.time_linear:
+            op.append('ln')
+        if self.time_driver:
+            op.append('drv')
+        op = '_'.join(op)
+
+        filename = '%s_%s_%s.dat' % (name, mode, op)
+
+        outfile = open(filename, 'w')
+        outfile.write(name)
+        outfile.write('\n')
+        outfile.write(mode)
+        outfile.write('\n')
+        outfile.write('%s, %s, %s' % (self.time_nonlinear, self.time_linear, self.time_driver))
+        outfile.write('\n')
+
+        for ndv, nstate, nproc, t1, t3, t5 in data:
+            outfile.write('%d, %d, %d, %f, %f, %f' % (ndv, nstate, nproc, t1, t3, t5))
+            outfile.write('\n')
+        outfile.close()
+
+    def _run_nl_ln_drv(self, ndv, nstate, nproc):
         """
         Benchmark a single point.
 
@@ -131,12 +172,10 @@ class Bench(object):
             t4 = time()
             prob.run_driver()
             t5 = time() - t4
-            print("Linear Execution complete:", t3, 'sec')
+            print("Driver Execution complete:", t3, 'sec')
         else:
             t5 = 0.0
 
+        self.post_run()
+
         return t1, t3, t5
-
-
-def PostProccss(filename):
-    pass
