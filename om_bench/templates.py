@@ -65,8 +65,8 @@ print('Running: dv=<ndv>, state=<nstate>, proc=<nproc>, av=<average>')
 
 t1, t3, t5 = bench._run_nl_ln_drv(<ndv>, <nstate>, <nproc>, use_mpi=True)
 
-if MPI and MPI.COMM_WORLD.rank == 0:
-    outname = '_%s_%d_%d_%d_%d.dat' % ('<name>', <ndv>, <nstate>, <nproc>, <average>)
+if (MPI and MPI.COMM_WORLD.rank == 0) or not MPI:
+    outname = '%s.dat' % '<filename>'
     outfile = open(outname, 'w')
     outfile.write('%f, %f, %f' % (t1, t3, t5))
     outfile.close()

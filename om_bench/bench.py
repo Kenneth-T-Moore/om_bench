@@ -158,6 +158,16 @@ class Bench(object):
         states = self.states
         procs = self.procs
 
+        mode = self.mode
+        op = []
+        if self.time_nonlinear:
+            op.append('nl')
+        if self.time_linear:
+            op.append('ln')
+        if self.time_driver:
+            op.append('drv')
+        op = '_'.join(op)
+
         data = []
 
         for nproc in procs:
@@ -165,7 +175,7 @@ class Bench(object):
                 for ndv in desvars:
                     for j in range(self.num_averages):
 
-                        name = '_%s_%d_%d_%d_%d' % (self.name, ndv, nstate, nproc, j)
+                        name = '_%s_%s_%s_%d_%d_%d_%d' % (self.name, mode, op, ndv, nstate, nproc, j)
 
                         # Prepare python code
                         self._prepare_run_script(nproc, nstate, ndv, j, name)
@@ -174,7 +184,7 @@ class Bench(object):
                         self._prepare_pbs_job(nproc, nstate, ndv, j, name)
 
                         # Submit job
-                        p = subprocess.Popen(["qsub", '%s.py' % name])
+                        # p = subprocess.Popen(["qsub", '%s.py' % name])
 
         print("All jobs submitted.")
 
@@ -239,6 +249,7 @@ class Bench(object):
         tp = tp.replace('<module>', module)
         tp = tp.replace('<classname>', classname)
         tp = tp.replace('<name>', self.name)
+        tp = tp.replace('<filename>', name)
         tp = tp.replace('<time_linear>', str(self.time_linear))
         tp = tp.replace('<time_driver>', str(self.time_driver))
 
