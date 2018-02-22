@@ -5,6 +5,7 @@ from six import iteritems
 from six.moves import range
 from collections import Iterable
 import os
+import subprocess
 import sys
 from time import time
 
@@ -72,7 +73,6 @@ class Bench(object):
         This method is overriden by the user.
         """
         pass
-
 
     def post_run(self, problem):
         """
@@ -165,14 +165,18 @@ class Bench(object):
                 for ndv in desvars:
                     for j in range(self.num_averages):
 
+                        name = '_%s_%d_%d_%d_%d' % (self.name, ndv, nstate, nproc, j)
+
                         # Prepare python code
-                        self._prepare_run_script(nproc, nstate, ndv, j)
+                        self._prepare_run_script(nproc, nstate, ndv, j, name)
 
                         # Prepare job submission file
-                        self._prepare_pbs_job(nproc, nstate, ndv, j)
+                        self._prepare_pbs_job(nproc, nstate, ndv, j, name)
 
                         # Submit job
-                        pass
+                        p = subprocess.Popen(["qsub", '%s.py' % name])
+
+        print("All jobs submitted.")
 
     def _run_nl_ln_drv(self, ndv, nstate, nproc, use_mpi=False):
         """
@@ -219,7 +223,7 @@ class Bench(object):
 
         return t1, t3, t5
 
-    def _prepare_run_script(self, ndv, nstate, nproc, average):
+    def _prepare_run_script(self, ndv, nstate, nproc, average, name):
         """
         Output run script for mpi submission using template.
         """
@@ -238,17 +242,16 @@ class Bench(object):
         tp = tp.replace('<time_linear>', str(self.time_linear))
         tp = tp.replace('<time_driver>', str(self.time_driver))
 
-        outname = '_%s_%d_%d_%d_%d.py' % (self.name, ndv, nstate, nproc, average)
+        outname = '%s.py' % name
         outfile = open(outname, 'w')
         outfile.write(tp)
         outfile.close()
 
-    def _prepare_pbs_job(self, ndv, nstate, nproc, average):
+    def _prepare_pbs_job(self, ndv, nstate, nproc, average, name):
         """
         Output PBS run submission file using template.
         """
         tp = qsub_template
-        name = '_%s_%d_%d_%d_%d' % (self.name, ndv, nstate, nproc, average)
 
         tp = tp.replace('<name>', name)
         tp = tp.replace('<walltime>', str(self.walltime))
@@ -260,3 +263,4 @@ class Bench(object):
         outfile = open(outname, 'w')
         outfile.write(tp)
         outfile.close()
+

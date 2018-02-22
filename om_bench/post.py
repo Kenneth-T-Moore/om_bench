@@ -68,4 +68,4 @@ def post_process(filename, title):
         plt.savefig("%s_%s_%s.png" % (name, mode, 'nl'))
 
     plt.show()
-    print('hey')
+    print('done')

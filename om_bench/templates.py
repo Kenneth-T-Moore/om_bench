@@ -19,6 +19,33 @@ Auto generated batch file.
 
 source ~/.bashrc
 
+unset USE_PROC_FILES
+
+cd <local>
+
+mpiexec python -u <name>.py
+"""
+
+
+qsub_template_amd = """
+::::::::::::::
+Auto generated batch file.
+::::::::::::::
+#PBS -S /bin/bash
+#PBS -N <name>
+#PBS -l select=1:ncpus=1:mpiprocs=1:model=bro+5:ncpus=28:mpiprocs=28:model=bro
+#PBS -l walltime=<walltime>:00:00
+#PBS -j oe
+#PBS -W group_list=a1607
+#PBS -m bae
+#PBS -o stdout_<name>.out
+#PBS -e stderr_<name>.out
+#PBS -q normal
+
+source ~/.bashrc
+
+unset USE_PROC_FILES
+
 cd <local>
 
 mpiexec python -u <name>.py

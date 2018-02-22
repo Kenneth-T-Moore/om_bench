@@ -19,7 +19,7 @@ class BeamBench(Bench):
         volume = 0.01
         num_elements = 50 * nstate
         num_cp = ndv * 4
-        num_load_cases = 1
+        num_load_cases = 16
 
         problem.model = MultipointBeamGroup(E=E, L=L, b=b, volume=volume, num_elements=num_elements,
                                             num_cp=num_cp, num_load_cases=num_load_cases)
