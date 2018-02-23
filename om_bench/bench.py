@@ -184,7 +184,7 @@ class Bench(object):
                         self._prepare_pbs_job(nproc, nstate, ndv, j, name)
 
                         # Submit job
-                        # p = subprocess.Popen(["qsub", '%s.py' % name])
+                        p = subprocess.Popen(["qsub", '%s.py' % name])
 
         print("All jobs submitted.")
 
@@ -263,12 +263,19 @@ class Bench(object):
         Output PBS run submission file using template.
         """
         tp = qsub_template
+        proc_node = 24.0
 
         tp = tp.replace('<name>', name)
         tp = tp.replace('<walltime>', str(self.walltime))
 
         local = os.getcwd()
         tp = tp.replace('<local>', local)
+
+        # Figure out the number of nodes and procs
+        node = int(np.ceil(nproc/proc_node))
+
+        tp = tp.replace('<node>', node)
+        tp = tp.replace('<nproc>', nproc)
 
         outname = '%s.sh' % name
         outfile = open(outname, 'w')

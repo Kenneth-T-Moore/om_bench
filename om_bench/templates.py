@@ -8,14 +8,14 @@ Auto generated batch file.
 ::::::::::::::
 #PBS -S /bin/bash
 #PBS -N <name>
-#PBS -l select=6:ncpus=24:model=has
+#PBS -l select=<node>:ncpus=24:model=has
 #PBS -l walltime=<walltime>:00:00
 #PBS -j oe
 #PBS -W group_list=a1607
 #PBS -m bae
 #PBS -o stdout_<name>.out
 #PBS -e stderr_<name>.out
-#PBS -q normal
+#PBS -q devel
 
 source ~/.bashrc
 
@@ -23,7 +23,7 @@ unset USE_PROC_FILES
 
 cd <local>
 
-mpiexec python -u <name>.py
+mpiexec -n <nproc> python -u <name>.py
 """
 
 

@@ -36,6 +36,7 @@ if __name__ == "__main__":
     procs = [1, 2, 4]
 
     bench = BeamBench(desvars, states, procs, name='beam')
+    bench.num_averages = 2
 
     bench.run_benchmark_mpi()
 
