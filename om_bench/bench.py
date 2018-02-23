@@ -12,7 +12,6 @@ from time import time
 import numpy as np
 
 from openmdao.api import Problem, PETScVector, DefaultVector
-from openmdao.utils.mpi import MPI
 
 from om_bench.templates import qsub_template, run_template
 
