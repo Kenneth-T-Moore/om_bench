@@ -11,7 +11,7 @@ from time import time
 
 import numpy as np
 
-from openmdao.api import Problem
+from openmdao.core.problem import Problem
 
 from om_bench.templates import qsub_template, run_template
 
