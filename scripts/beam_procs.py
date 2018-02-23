@@ -32,7 +32,7 @@ class BeamBench(Bench):
 if __name__ == "__main__":
 
     desvars = [1]
-    states = [1]
+    states = [32]
     procs = [1, 2, 4]
 
     bench = BeamBench(desvars, states, procs, name='beam')
