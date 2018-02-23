@@ -33,7 +33,7 @@ if __name__ == "__main__":
 
     desvars = [1]
     states = [32]
-    procs = [1, 2, 4]
+    procs = [1, 2, 4, 8, 16, 32]
 
     bench = BeamBench(desvars, states, procs, name='beam')
     bench.num_averages = 2
