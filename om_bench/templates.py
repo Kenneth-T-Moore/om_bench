@@ -3,9 +3,6 @@ Templates for MPI submission."""
 
 
 qsub_template = """
-::::::::::::::
-Auto generated batch file.
-::::::::::::::
 #PBS -S /bin/bash
 #PBS -N <name>
 #PBS -l select=<node>:ncpus=24:model=has
@@ -15,7 +12,7 @@ Auto generated batch file.
 #PBS -m bae
 #PBS -o stdout_<name>.out
 #PBS -e stderr_<name>.out
-#PBS -q devel
+#PBS -q normal
 
 source ~/.bashrc
 
@@ -28,9 +25,6 @@ mpiexec -n <nproc> python -u <name>.py
 
 
 qsub_template_amd = """
-::::::::::::::
-Auto generated batch file.
-::::::::::::::
 #PBS -S /bin/bash
 #PBS -N <name>
 #PBS -l select=1:ncpus=1:mpiprocs=1:model=bro+5:ncpus=28:mpiprocs=28:model=bro

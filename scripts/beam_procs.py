@@ -37,6 +37,7 @@ if __name__ == "__main__":
 
     bench = BeamBench(desvars, states, procs, name='beam')
     bench.num_averages = 2
+    bench.walltime = 1
 
     bench.run_benchmark_mpi()
 
