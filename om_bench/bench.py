@@ -203,7 +203,7 @@ class Bench(object):
             from openmdao.api import PETScVector
             vector_class = PETScVector
         else:
-            from openmdao.api import DefaultVector
+            from openmdao.vectors.default_vector import DefaultVector
             vector_class = DefaultVector
 
         vector_class = PETScVector if use_mpi else DefaultVector
