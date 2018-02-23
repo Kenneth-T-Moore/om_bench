@@ -11,7 +11,7 @@ from time import time
 
 import numpy as np
 
-from openmdao.api import Problem, PETScVector, DefaultVector
+from openmdao.api import Problem
 
 from om_bench.templates import qsub_template, run_template
 
@@ -197,6 +197,14 @@ class Bench(object):
 
         # User hook pre setup
         self.setup(prob, ndv, nstate, nproc)
+
+        # Do this here so that we don't get rejected from running on a head node.
+        if use_mpi:
+            from openmdao.api import PETScVector
+            vector_class = PETScVector
+        else:
+            from openmdao.api import DefaultVector
+            vector_class = DefaultVector
 
         vector_class = PETScVector if use_mpi else DefaultVector
         prob.setup(vector_class=vector_class)
