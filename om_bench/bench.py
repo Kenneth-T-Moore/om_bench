@@ -183,7 +183,7 @@ class Bench(object):
                         self._prepare_pbs_job(nproc, nstate, ndv, j, name)
 
                         # Submit job
-                        p = subprocess.Popen(["qsub", '%s.py' % name])
+                        p = subprocess.Popen(["qsub", '%s.sh' % name])
                         #command = ". ~/.bashrc; qsub", '%s.py' % name
                         #p = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
 
