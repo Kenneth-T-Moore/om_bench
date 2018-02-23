@@ -177,10 +177,10 @@ class Bench(object):
                         name = '_%s_%s_%s_%d_%d_%d_%d' % (self.name, mode, op, ndv, nstate, nproc, j)
 
                         # Prepare python code
-                        self._prepare_run_script(nproc, nstate, ndv, j, name)
+                        self._prepare_run_script(ndv, nstate, nproc, j, name)
 
                         # Prepare job submission file
-                        self._prepare_pbs_job(nproc, nstate, ndv, j, name)
+                        self._prepare_pbs_job(ndv, nstate, nproc, j, name)
 
                         # Submit job
                         p = subprocess.Popen(["qsub", '%s.sh' % name])
