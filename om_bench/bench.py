@@ -281,8 +281,8 @@ class Bench(object):
         # Figure out the number of nodes and procs
         node = int(np.ceil(nproc/proc_node))
 
-        tp = tp.replace('<node>', node)
-        tp = tp.replace('<nproc>', nproc)
+        tp = tp.replace('<node>', str(node))
+        tp = tp.replace('<nproc>', str(nproc))
 
         outname = '%s.sh' % name
         outfile = open(outname, 'w')
