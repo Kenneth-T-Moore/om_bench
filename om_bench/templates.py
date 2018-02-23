@@ -14,8 +14,6 @@ qsub_template = """
 #PBS -e stderr_<name>.out
 #PBS -q normal
 
-source ~/.bashrc
-
 unset USE_PROC_FILES
 
 cd <local>
@@ -35,8 +33,6 @@ qsub_template_amd = """
 #PBS -o stdout_<name>.out
 #PBS -e stderr_<name>.out
 #PBS -q normal
-
-source ~/.bashrc
 
 unset USE_PROC_FILES
 
