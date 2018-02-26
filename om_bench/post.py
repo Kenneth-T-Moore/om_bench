@@ -34,6 +34,7 @@ def post_process(filename, title):
     for j, line in enumerate(data):
         x_dv[j], x_state[j], x_proc[j], t1[j], t3[j], t5[j] = line.strip().split(',')
 
+    # Times are all normalized.
     t1 = t1/t1[0]
     t3 = t3/t3[0]
     t5 = t5/t5[0]
@@ -68,7 +69,11 @@ def post_process(filename, title):
         plt.ylabel('Linear Solve: Normalized Time')
         plt.title(title)
         plt.grid(True)
-        plt.savefig("%s_%s_%s.png" % (name, mode, 'nl'))
+        plt.savefig("%s_%s_%s.png" % (name, mode, 'ln'))
+
+        # For procs, we also view the time/proc as a function of number of procs.
+        if mode == 'proc':
+            pass
 
     plt.show()
     print('done')
@@ -120,9 +125,9 @@ def assemble_mpi_results():
         av.add(int(parts[3]))
 
     data = []
-    for idv in dv:
-        for istate in state:
-            for iproc in proc:
+    for idv in sorted(dv):
+        for istate in sorted(state):
+            for iproc in sorted(proc):
 
                 t1_sum = 0.0
                 t3_sum = 0.0

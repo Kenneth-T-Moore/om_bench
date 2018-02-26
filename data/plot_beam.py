@@ -13,3 +13,7 @@ post_process(filename, 'FEM Beam')
 filename = 'beam_desvar_nl_ln.dat'
 
 post_process(filename, 'FEM Beam')
+
+filename = 'beam_proc_nl_ln.dat'
+
+post_process(filename, 'FEM Beam')
