@@ -13,7 +13,7 @@ import numpy as np
 
 from openmdao.core.problem import Problem
 
-from om_bench.templates import qsub_template, run_template
+from om_bench.templates import qsub_template, run_template, qsub_template_single_file
 
 
 class Bench(object):
@@ -54,6 +54,7 @@ class Bench(object):
         self.time_nonlinear = True
         self.time_linear = True
         self.time_driver = False
+        self.single_batch = False
 
         self.base_dir = os.getcwd()
 
@@ -168,7 +169,7 @@ class Bench(object):
         op = '_'.join(op)
 
         data = []
-
+        commands = []
         for nproc in procs:
             for nstate in states:
                 for ndv in desvars:
@@ -179,13 +180,25 @@ class Bench(object):
                         # Prepare python code
                         self._prepare_run_script(ndv, nstate, nproc, j, name)
 
-                        # Prepare job submission file
-                        self._prepare_pbs_job(ndv, nstate, nproc, j, name)
+                        if self.single_batch is True:
+                            command = "mpiexec -n %d python -u %s.py" % (nproc, name)
+                            commands.append(command)
 
-                        # Submit job
-                        p = subprocess.Popen(["qsub", '%s.sh' % name])
-                        #command = ". ~/.bashrc; qsub", '%s.py' % name
-                        #p = subprocess.Popen(command, stdout=subprocess.PIPE, shell=True)
+                        else:
+                            # Prepare job submission file
+                            self._prepare_pbs_job(ndv, nstate, nproc, j, name)
+
+                            # Submit job
+                            p = subprocess.Popen(["qsub", '%s.sh' % name])
+
+        if self.single_batch is True:
+            name = '_%s_%s_%s_all' % (self.name, mode, op)
+
+            # Prepare job submission file
+            self._prepare_pbs_job_single_file(procs, name, commands)
+
+            # Submit job
+            p = subprocess.Popen(["qsub", '%s.sh' % name])
 
         print("All jobs submitted.")
 
@@ -285,6 +298,32 @@ class Bench(object):
 
         tp = tp.replace('<node>', str(node))
         tp = tp.replace('<nproc>', str(nproc))
+
+        outname = '%s.sh' % name
+        outfile = open(outname, 'w')
+        outfile.write(tp)
+        outfile.close()
+
+    def _prepare_pbs_job_single_file(self, procs, name, commands):
+        """
+        Output PBS run submission file using template, but running all python scripts in one file.
+        """
+        tp = qsub_template_single_file
+        proc_node = 24.0
+
+        tp = tp.replace('<name>', name)
+        tp = tp.replace('<walltime>', str(self.walltime))
+
+        local = os.getcwd()
+        tp = tp.replace('<local>', local)
+
+        # Figure out the number of nodes and procs
+        node = int(np.ceil(np.max(procs)/proc_node))
+
+        tp = tp.replace('<node>', str(node))
+
+        cmd_txt = '\n'.join(commands)
+        tp = tp.replace('<commands>', cmd_txt)
 
         outname = '%s.sh' % name
         outfile = open(outname, 'w')

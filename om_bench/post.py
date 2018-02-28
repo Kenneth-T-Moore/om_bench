@@ -47,7 +47,7 @@ def post_process(filename, title):
         x = x_dv
     elif mode == 'proc':
         x = x_proc
-        xlab = "Normalized number of processors."
+        xlab = "Number of processors."
 
     # Generate plots
 
@@ -73,7 +73,14 @@ def post_process(filename, title):
 
         # For procs, we also view the time/proc as a function of number of procs.
         if mode == 'proc':
-            pass
+            plt.figure(3)
+            plt.loglog(x, t3/x, 'o-')
+
+            plt.xlabel(xlab)
+            plt.ylabel('Linear Solve: Normalized Time per Processor')
+            plt.title(title)
+            plt.grid(True)
+            plt.savefig("%s_%s_%s_per_proc.png" % (name, mode, 'ln'))
 
     plt.show()
     print('done')

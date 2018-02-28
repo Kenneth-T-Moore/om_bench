@@ -20,6 +20,24 @@ cd <local>
 
 mpiexec -n <nproc> python -u <name>.py
 """
+qsub_template_single_file = """
+#PBS -S /bin/bash
+#PBS -N <name>
+#PBS -l select=<node>:ncpus=24:model=has
+#PBS -l walltime=<walltime>:00:00
+#PBS -j oe
+#PBS -W group_list=a1607
+#PBS -m bae
+#PBS -o stdout_<name>.out
+#PBS -e stderr_<name>.out
+#PBS -q normal
+
+unset USE_PROC_FILES
+
+cd <local>
+
+<commands>
+"""
 
 
 qsub_template_amd = """
