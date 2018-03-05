@@ -7,7 +7,6 @@ import numpy as np
 
 from om_bench.bench import Bench
 
-from openmdao.api import NonlinearBlockJac
 from openmdao.test_suite.test_examples.beam_optimization.multipoint_beam_group import MultipointBeamGroup
 
 
@@ -26,7 +25,7 @@ class BeamBench(Bench):
                                             num_cp=num_cp, num_load_cases=num_load_cases)
 
     def post_setup(self, problem, ndv, nstate, nproc):
-        problem.model.parallel.nonlinear_solver = NonlinearBlockJac()
+        pass
 
     def post_run(problem):
         # Check stuff here.
@@ -45,11 +44,3 @@ if __name__ == "__main__":
     bench.single_batch = True
 
     bench.run_benchmark_mpi()
-
-
-
-
-
-
-
-
