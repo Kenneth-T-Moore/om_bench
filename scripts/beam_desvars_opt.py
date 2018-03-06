@@ -42,7 +42,7 @@ if __name__ == "__main__":
     procs = [1]
 
     bench = BeamBench(desvars, states, procs, name='beam')
-    bench.num_averages = 1
+    bench.num_averages = 5
     bench.walltime = 1
     bench.time_nonlinear = False
     bench.time_linear = False
