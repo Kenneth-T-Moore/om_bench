@@ -213,7 +213,6 @@ class Bench(object):
         # User hook pre setup
         self.setup(prob, ndv, nstate, nproc)
 
-        # Do this here so that we don't get rejected from running on a head node.
         if use_mpi:
             from openmdao.api import PETScVector
             vector_class = PETScVector
@@ -247,7 +246,7 @@ class Bench(object):
             t4 = time()
             prob.run_driver()
             t5 = time() - t4
-            print("Driver Execution complete:", t3, 'sec')
+            print("Driver Execution complete:", t5, 'sec')
         else:
             t5 = 0.0
 
