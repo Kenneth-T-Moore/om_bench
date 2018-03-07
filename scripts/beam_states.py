@@ -12,12 +12,12 @@ from openmdao.test_suite.test_examples.beam_optimization.multipoint_beam_group i
 
 class BeamBench(Bench):
 
-    def setup(self, problem, ndv, nstate, nproc):
+    def setup(self, problem, ndv, nstate, nproc, flag):
         E = 1.
         L = 1.
         b = 0.1
         volume = 0.01
-        num_elements = 50 * nstate
+        num_elements = nstate
         num_cp = ndv * 16
         num_load_cases = 32
 
@@ -33,6 +33,7 @@ if __name__ == "__main__":
 
     desvars = [1]
     states = [1, 2, 4, 8, 16, 32]
+    states = [item * 50 for item in states]
     procs = [1]
 
     bench = BeamBench(desvars, states, procs, name='beam')

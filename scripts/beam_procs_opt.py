@@ -13,7 +13,7 @@ from openmdao.test_suite.test_examples.beam_optimization.multipoint_beam_group i
 
 class BeamBench(Bench):
 
-    def setup(self, problem, ndv, nstate, nproc):
+    def setup(self, problem, ndv, nstate, nproc, flag):
         E = 1.
         L = 1.
         b = 0.1
@@ -30,7 +30,7 @@ class BeamBench(Bench):
         #problem.driver.options['tol'] = 1e-9
         #problem.driver.options['disp'] = True
 
-    def post_setup(self, problem, ndv, nstate, nproc):
+    def post_setup(self, problem, ndv, nstate, nproc, flag):
         pass
 
     def post_run(problem):

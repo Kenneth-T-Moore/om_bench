@@ -17,10 +17,53 @@ from om_bench.templates import qsub_template, run_template, qsub_template_single
 
 
 class Bench(object):
+    """
+    Attributes
+    ----------
+    num_averages : int
+        Number of time to repeat each calculation and save the average time.
+    single_file : bool
+        If True, then mpi submissions are placed in a single qsub file and submitted as one job;
+        if False, then they are submitted separately.
+    time_driver : bool(False)
+        If True, run the driver (i.e., optimizer) and save timings.
+    time_linear : bool(True)
+        If True, run the linear solve and save timings.
+    time_nonlinear : bool(True)
+        If True, save timings from the nonlinear solve. Nonlinear solve always runs regardless.
+    _desvars : list
+        List of ascending integers that are individually passed in to the problem to request the
+        number of design variables.
+    _name : string
+        Name for this problem. Should be unix-safe but not contain underscores.
+    _procs : list
+        List of ascending integers that are individually passed in to the problem to request the
+        number of processors during mpi execution.
+    _states : list
+        List of ascending integers that are individually passed in to the problem to request the
+        number of states. States should be independent of design variables.
+    """
 
-    def __init__(self, desvars, states, procs, name='bench'):
+    def __init__(self, desvars, states, procs, name='bench', use_flag=False):
         """
         Initialize the benchmark assistant class.
+
+        Parameters
+        ----------
+        desvars : list
+            List of ascending integers that are individually passed in to the problem to request the
+            number of design variables.
+        states : list
+            List of ascending integers that are individually passed in to the problem to request the
+            number of states. States should be independent of design variables.
+        procs : list
+            List of ascending integers that are individually passed in to the problem to request the
+            number of processors during mpi execution.
+        name : string
+            Name for this problem. Should be unix-safe but not contain underscores.
+        use_flag : bool
+            Set to True to enable a single flag to be turned on and off. All cases will be executed
+            with flag set to False and True.
         """
         if not isinstance(desvars, Iterable):
             desvars = [desvars]
@@ -42,12 +85,13 @@ class Bench(object):
         elif nproc > 1:
             self.mode = 'proc'
 
-        self.name = name
+        self._name = name
         #self.basedir = basedir
 
-        self.desvars = desvars
-        self.states = states
-        self.procs = procs
+        self._desvars = desvars
+        self._states = states
+        self._procs = procs
+        self._use_flag = use_flag
 
         # Options
         self.num_averages = 5
@@ -58,19 +102,45 @@ class Bench(object):
 
         self.base_dir = os.getcwd()
 
-    def setup(self, problem, ndv, nstate, nproc):
+    def setup(self, problem, ndv, nstate, nproc, flag):
         """
         Set up the problem.
 
         This method is overriden by the user, and is used to build the problem prior to setup.
+
+        Parameters
+        ----------
+        problem : <Problem>
+            Clean OpenMDAO problem object.
+        ndv : int
+            Number of design variables requested.
+        nstate : int
+            Number of states requested.
+        nproc : int
+            Number of processors requested.
+        flag : bool
+            User assignable flag that will be False or True.
         """
         pass
 
-    def post_setup(self, problem, ndv, nstate, nproc):
+    def post_setup(self, problem, ndv, nstate, nproc, flag):
         """
         Perform all post-setup operations before final setup.
 
         This method is overriden by the user.
+
+        Parameters
+        ----------
+        problem : <Problem>
+            Clean OpenMDAO problem object.
+        ndv : int
+            Number of design variables requested.
+        nstate : int
+            Number of states requested.
+        nproc : int
+            Number of processors requested.
+        flag : bool
+            User assignable flag that will be False or True.
         """
         pass
 
@@ -79,6 +149,17 @@ class Bench(object):
         Perform any post benchmark activities, like testing the result.
 
         This method is overriden by the user.
+
+        Parameters
+        ----------
+        problem : <Problem>
+            Clean OpenMDAO problem object.
+        ndv : int
+            Number of design variables requested.
+        nstate : int
+            Number of states requested.
+        nproc : int
+            Number of processors requested.
         """
         pass
 
@@ -86,9 +167,9 @@ class Bench(object):
         """
         Run benchmarks and save data.
         """
-        desvars = self.desvars
-        states = self.states
-        procs = self.procs
+        desvars = self._desvars
+        states = self._states
+        procs = self._procs
 
         # This method only supports single proc.
         if len(procs) > 1 or procs[0] > 1:
@@ -97,32 +178,38 @@ class Bench(object):
 
         data = []
 
+        flags = [False]
+        if self._use_flag:
+            flags.append(True)
+
         nproc = 1
         for nstate in states:
             for ndv in desvars:
+                for flag in flags:
 
-                print("\n")
-                print('Running: dv=%d, state=%d, proc=%d' % (ndv, nstate, nproc))
-                print("\n")
+                    print("\n")
+                    print('Running: dv=%d, state=%d, proc=%d, flag=%s' % (ndv, nstate, nproc,
+                                                                          flag))
+                    print("\n")
 
-                t1_sum = 0.0
-                t3_sum = 0.0
-                t5_sum = 0.0
-                for j in range(self.num_averages):
-                    t1, t3, t5 = self._run_nl_ln_drv(ndv, nstate, nproc)
-                    t1_sum += t1
-                    t3_sum += t3
-                    t5_sum += t5
+                    t1_sum = 0.0
+                    t3_sum = 0.0
+                    t5_sum = 0.0
+                    for j in range(self.num_averages):
+                        t1, t3, t5 = self._run_nl_ln_drv(ndv, nstate, nproc, flag)
+                        t1_sum += t1
+                        t3_sum += t3
+                        t5_sum += t5
 
-                t1_av = t1_sum / (j + 1)
-                t3_av = t3_sum / (j + 1)
-                t5_av = t5_sum / (j + 1)
+                    t1_av = t1_sum / (j + 1)
+                    t3_av = t3_sum / (j + 1)
+                    t5_av = t5_sum / (j + 1)
 
-                data.append((ndv, nstate, nproc, t1_av, t3_av, t5_av))
+                    data.append((ndv, nstate, nproc, flag, t1_av, t3_av, t5_av))
 
         os.chdir(self.base_dir)
 
-        name = self.name
+        name = self._name
         mode = self.mode
         op = []
         if self.time_nonlinear:
@@ -143,20 +230,25 @@ class Bench(object):
         outfile.write('%s, %s, %s' % (self.time_nonlinear, self.time_linear, self.time_driver))
         outfile.write('\n')
 
-        for ndv, nstate, nproc, t1, t3, t5 in data:
-            outfile.write('%d, %d, %d, %f, %f, %f' % (ndv, nstate, nproc, t1, t3, t5))
+        for ndv, nstate, nproc, flag, t1, t3, t5 in data:
+            outfile.write('%d, %d, %d, %s, %f, %f, %f' % (ndv, nstate, nproc, str(flag), t1, t3, t5))
             outfile.write('\n')
         outfile.close()
 
     def run_benchmark_mpi(self, walltime=4):
         """
         Create and submit jobs that run benchmarks and save data.
+
+        Parameters
+        ----------
+        walltime : int
+            Amount of walltime for the mpi jobs in hours.
         """
         self.walltime = walltime
 
-        desvars = self.desvars
-        states = self.states
-        procs = self.procs
+        desvars = self._desvars
+        states = self._states
+        procs = self._procs
 
         mode = self.mode
         op = []
@@ -168,31 +260,38 @@ class Bench(object):
             op.append('drv')
         op = '_'.join(op)
 
+        flags = [False]
+        if self._use_flag:
+            flags.append(True)
+
         data = []
         commands = []
         for nproc in procs:
             for nstate in states:
                 for ndv in desvars:
-                    for j in range(self.num_averages):
+                    for flag in flags:
 
-                        name = '_%s_%s_%s_%d_%d_%d_%d' % (self.name, mode, op, ndv, nstate, nproc, j)
+                        for j in range(self.num_averages):
 
-                        # Prepare python code
-                        self._prepare_run_script(ndv, nstate, nproc, j, name)
+                            name = '_%s_%s_%s_%d_%d_%d_%s_%d' % (self._name, mode, op, ndv,
+                                                                 nstate, nproc, str(flag), j)
 
-                        if self.single_batch is True:
-                            command = "mpiexec -n %d python -u %s.py" % (nproc, name)
-                            commands.append(command)
+                            # Prepare python code
+                            self._prepare_run_script(ndv, nstate, nproc, flag, j, name)
 
-                        else:
-                            # Prepare job submission file
-                            self._prepare_pbs_job(ndv, nstate, nproc, j, name)
+                            if self.single_batch is True:
+                                command = "mpiexec -n %d python -u %s.py" % (nproc, name)
+                                commands.append(command)
 
-                            # Submit job
-                            p = subprocess.Popen(["qsub", '%s.sh' % name])
+                            else:
+                                # Prepare job submission file
+                                self._prepare_pbs_job(ndv, nstate, nproc, j, name)
+
+                                # Submit job
+                                p = subprocess.Popen(["qsub", '%s.sh' % name])
 
         if self.single_batch is True:
-            name = '_%s_%s_%s_all' % (self.name, mode, op)
+            name = '_%s_%s_%s_all' % (self._name, mode, op)
 
             # Prepare job submission file
             self._prepare_pbs_job_single_file(procs, name, commands)
@@ -202,16 +301,29 @@ class Bench(object):
 
         print("All jobs submitted.")
 
-    def _run_nl_ln_drv(self, ndv, nstate, nproc, use_mpi=False):
+    def _run_nl_ln_drv(self, ndv, nstate, nproc, flag, use_mpi=False):
         """
         Benchmark a single point.
 
         Nonlinear solve is always run. Linear Solve and Driver are optional.
+
+        Parameters
+        ----------
+        ndv : int
+            Number of design variables requested.
+        nstate : int
+            Number of states requested.
+        nproc : int
+            Number of processors requested.
+        flag : bool
+            User assignable flag that will be False or True.
+        use_mpi : bool
+            When True, setup the problem with the PetscVector.
         """
         prob = Problem()
 
         # User hook pre setup
-        self.setup(prob, ndv, nstate, nproc)
+        self.setup(prob, ndv, nstate, nproc, flag)
 
         if use_mpi:
             from openmdao.api import PETScVector
@@ -224,7 +336,7 @@ class Bench(object):
         prob.setup(vector_class=vector_class)
 
         # User hook post setup
-        self.post_setup(prob, ndv, nstate, nproc)
+        self.post_setup(prob, ndv, nstate, nproc, flag)
 
         prob.final_setup()
 
@@ -254,14 +366,30 @@ class Bench(object):
 
         return t1, t3, t5
 
-    def _prepare_run_script(self, ndv, nstate, nproc, average, name):
+    def _prepare_run_script(self, ndv, nstate, nproc, flag, average, name):
         """
         Output run script for mpi submission using template.
+
+        Parameters
+        ----------
+        ndv : int
+            Number of design variables requested.
+        nstate : int
+            Number of states requested.
+        nproc : int
+            Number of processors requested.
+        flag : bool
+            User assignable flag that will be False or True.
+        average : int
+            Which average we are on.
+        name : string
+            Unique filename for the output data.
         """
         tp = run_template
         tp = tp.replace('<ndv>', str(ndv))
         tp = tp.replace('<nstate>', str(nstate))
         tp = tp.replace('<nproc>', str(nproc))
+        tp = tp.replace('<flag>', str(flag))
         tp = tp.replace('<average>', str(average))
 
         # We need to import from the file that is running.
@@ -269,7 +397,7 @@ class Bench(object):
         classname = self.__class__.__name__
         tp = tp.replace('<module>', module)
         tp = tp.replace('<classname>', classname)
-        tp = tp.replace('<name>', self.name)
+        tp = tp.replace('<name>', self._name)
         tp = tp.replace('<filename>', name)
         tp = tp.replace('<time_linear>', str(self.time_linear))
         tp = tp.replace('<time_driver>', str(self.time_driver))
@@ -279,9 +407,24 @@ class Bench(object):
         outfile.write(tp)
         outfile.close()
 
-    def _prepare_pbs_job(self, ndv, nstate, nproc, average, name):
+    def _prepare_pbs_job(self, ndv, nstate, nproc, flag, average, name):
         """
         Output PBS run submission file using template.
+
+        Parameters
+        ----------
+        ndv : int
+            Number of design variables requested.
+        nstate : int
+            Number of states requested.
+        nproc : int
+            Number of processors requested.
+        flag : bool
+            User assignable flag that will be False or True.
+        average : int
+            Which average we are on.
+        name : string
+            Unique filename for the output data.
         """
         tp = qsub_template
         proc_node = 24.0
@@ -297,6 +440,7 @@ class Bench(object):
 
         tp = tp.replace('<node>', str(node))
         tp = tp.replace('<nproc>', str(nproc))
+        tp = tp.replace('<flag>', str(flag))
 
         outname = '%s.sh' % name
         outfile = open(outname, 'w')

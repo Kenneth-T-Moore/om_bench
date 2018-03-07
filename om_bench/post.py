@@ -32,7 +32,7 @@ def post_process(filename, title):
     x_proc = np.empty((npt, ))
 
     for j, line in enumerate(data):
-        x_dv[j], x_state[j], x_proc[j], t1[j], t3[j], t5[j] = line.strip().split(',')
+        x_dv[j], x_state[j], x_proc[j], _, t1[j], t3[j], t5[j] = line.strip().split(',')
 
     # Times are all normalized.
     t1 = t1/t1[0]
