@@ -20,6 +20,8 @@ class Bench(object):
     """
     Attributes
     ----------
+    mode : str
+        Derivatives mode string passed into openmdao setup. Can be ('fwd', 'rev')
     num_averages : int
         Number of time to repeat each calculation and save the average time.
     single_file : bool
@@ -39,12 +41,14 @@ class Bench(object):
     _procs : list
         List of ascending integers that are individually passed in to the problem to request the
         number of processors during mpi execution.
+    _run_mode : str
+        Determination of which quantity (state, dv, proc) we are varying.
     _states : list
         List of ascending integers that are individually passed in to the problem to request the
         number of states. States should be independent of design variables.
     """
 
-    def __init__(self, desvars, states, procs, name='bench', use_flag=False):
+    def __init__(self, desvars, states, procs, name='bench', mode='fwd', use_flag=False):
         """
         Initialize the benchmark assistant class.
 
@@ -61,6 +65,8 @@ class Bench(object):
             number of processors during mpi execution.
         name : string
             Name for this problem. Should be unix-safe but not contain underscores.
+        mode : str
+            Derivatives mode string passed into openmdao setup. Can be ('fwd', 'rev')
         use_flag : bool
             Set to True to enable a single flag to be turned on and off. All cases will be executed
             with flag set to False and True.
@@ -79,11 +85,11 @@ class Bench(object):
             raise ValueError("For now, please only vary one of [states, procs, desvars]")
 
         if ndv > 1:
-            self.mode = 'desvar'
+            self._run_mode = 'desvar'
         elif nstate > 1:
-            self.mode = 'state'
+            self._run_mode = 'state'
         elif nproc > 1:
-            self.mode = 'proc'
+            self._run_mode = 'proc'
 
         self._name = name
         #self.basedir = basedir
@@ -99,6 +105,7 @@ class Bench(object):
         self.time_linear = True
         self.time_driver = False
         self.single_batch = False
+        self.mode = mode
 
         self.base_dir = os.getcwd()
 
@@ -210,7 +217,7 @@ class Bench(object):
         os.chdir(self.base_dir)
 
         name = self._name
-        mode = self.mode
+        mode = self._run_mode
         op = []
         if self.time_nonlinear:
             op.append('nl')
@@ -250,7 +257,7 @@ class Bench(object):
         states = self._states
         procs = self._procs
 
-        mode = self.mode
+        mode = self._run_mode
         op = []
         if self.time_nonlinear:
             op.append('nl')
@@ -301,7 +308,7 @@ class Bench(object):
 
         print("All jobs submitted.")
 
-    def _run_nl_ln_drv(self, ndv, nstate, nproc, flag, use_mpi=False):
+    def _run_nl_ln_drv(self, ndv, nstate, nproc, flag, use_mpi=True):
         """
         Benchmark a single point.
 
@@ -333,7 +340,7 @@ class Bench(object):
             vector_class = DefaultVector
 
         vector_class = PETScVector if use_mpi else DefaultVector
-        prob.setup(vector_class=vector_class)
+        prob.setup(vector_class=vector_class, mode=self.mode)
 
         # User hook post setup
         self.post_setup(prob, ndv, nstate, nproc, flag)
@@ -399,6 +406,7 @@ class Bench(object):
         tp = tp.replace('<classname>', classname)
         tp = tp.replace('<name>', self._name)
         tp = tp.replace('<filename>', name)
+        tp = tp.replace('<mode>', self.mode)
         tp = tp.replace('<time_linear>', str(self.time_linear))
         tp = tp.replace('<time_driver>', str(self.time_driver))
 

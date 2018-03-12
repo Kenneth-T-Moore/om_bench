@@ -20,11 +20,14 @@ class BeamBench(Bench):
         max_bending = 100.0
         num_elements = 50 * nstate
         num_cp = ndv
-        num_load_cases = 32
+        num_load_cases = 4
+
+        parallel_deriv_color = 'Blue' if flag else None
 
         problem.model = MultipointBeamGroup(E=E, L=L, b=b, volume=volume, max_bending=max_bending,
                                             num_elements=num_elements,
-                                            num_cp=num_cp, num_load_cases=num_load_cases)
+                                            num_cp=num_cp, num_load_cases=num_load_cases,
+                                            parallel_deriv_color=parallel_deriv_color)
 
     def post_run(problem):
         # Check stuff here.
@@ -38,8 +41,8 @@ if __name__ == "__main__":
     states = [1]
     procs = [1]
 
-    bench = BeamBench(desvars, states, procs, mode='fwd', name='beam')
-    bench.num_averages = 5
+    bench = BeamBench(desvars, states, procs, mode='rev', name='beam-par', use_flag=True)
+    bench.num_averages = 3
 
     bench.run_benchmark()
 
