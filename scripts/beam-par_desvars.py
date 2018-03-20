@@ -42,7 +42,7 @@ if __name__ == "__main__":
     procs = [1]
 
     bench = BeamBench(desvars, states, procs, mode='rev', name='beam-par', use_flag=True)
-    bench.num_averages = 3
+    bench.num_averages = 5
 
     bench.run_benchmark()
 
