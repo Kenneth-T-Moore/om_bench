@@ -18,7 +18,7 @@ class BeamBench(Bench):
         b = 0.1
         volume = 0.01
         max_bending = 100.0
-        num_elements = 50 * nstate
+        num_elements = nstate
         num_cp = ndv
         num_load_cases = 64
 
@@ -36,9 +36,9 @@ class BeamBench(Bench):
 
 if __name__ == "__main__":
 
-    desvars = [1, 2, 4, 8, 16, 32]
-    desvars = [item * 50 for item in desvars]
-    states = [1]
+    desvars = [16]
+    states = [1, 2, 4, 8, 16, 32]
+    states = [item * 50 for item in states]
     procs = [1]
 
     bench = BeamBench(desvars, states, procs, mode='rev', name='beam-par', use_flag=True)
