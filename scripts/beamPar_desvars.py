@@ -20,7 +20,7 @@ class BeamBench(Bench):
         max_bending = 100.0
         num_elements = 50 * nstate
         num_cp = ndv
-        num_load_cases = 64
+        num_load_cases = 32
 
         parallel_derivs = flag
 
