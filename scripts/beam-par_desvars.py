@@ -22,12 +22,12 @@ class BeamBench(Bench):
         num_cp = ndv
         num_load_cases = 4
 
-        parallel_deriv_color = 'Blue' if flag else None
+        parallel_derivs = flag
 
         problem.model = MultipointBeamGroup(E=E, L=L, b=b, volume=volume, max_bending=max_bending,
                                             num_elements=num_elements,
                                             num_cp=num_cp, num_load_cases=num_load_cases,
-                                            parallel_deriv_color=parallel_deriv_color)
+                                            parallel_derivs=parallel_derivs)
 
     def post_run(problem):
         # Check stuff here.
