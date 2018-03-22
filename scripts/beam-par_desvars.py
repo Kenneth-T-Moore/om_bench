@@ -20,7 +20,7 @@ class BeamBench(Bench):
         max_bending = 100.0
         num_elements = 50 * nstate
         num_cp = ndv
-        num_load_cases = 4
+        num_load_cases = 32
 
         parallel_derivs = flag
 
@@ -37,7 +37,7 @@ class BeamBench(Bench):
 if __name__ == "__main__":
 
     desvars = [1, 2, 4, 8, 16, 32]
-    desvars = [item * 50 for item in desvars]
+    desvars = [item * 8 for item in desvars]
     states = [1]
     procs = [1]
 
