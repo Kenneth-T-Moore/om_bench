@@ -93,7 +93,7 @@ def assemble_mpi_results():
     allfiles = os.listdir('.')
     files = [n for n in allfiles if fnmatch.fnmatch(n, '_*.dat')]
 
-    stem_parts = files[0].split('_')[1:-4]
+    stem_parts = files[0].split('_')[1:-5]
     stem = '_' + '_'.join(stem_parts)
 
     nl = 'nl' in stem_parts
@@ -116,6 +116,7 @@ def assemble_mpi_results():
     state = set()
     proc = set()
     av = set()
+    flag = set()
     for fname in files:
 
         if not fname.startswith(stem):
@@ -129,35 +130,37 @@ def assemble_mpi_results():
         dv.add(int(parts[0]))
         state.add(int(parts[1]))
         proc.add(int(parts[2]))
-        av.add(int(parts[3]))
+        flag.add(parts[3])
+        av.add(int(parts[4]))
 
     data = []
     for idv in sorted(dv):
         for istate in sorted(state):
             for iproc in sorted(proc):
+                for iflag in flag:
 
-                t1_sum = 0.0
-                t3_sum = 0.0
-                t5_sum = 0.0
-                for iav in av:
-                    filename = stem + '_%s_%s_%s_%s.dat' % (idv, istate, iproc, iav)
-                    infile = open(filename, 'r')
+                    t1_sum = 0.0
+                    t3_sum = 0.0
+                    t5_sum = 0.0
+                    for iav in av:
+                        filename = stem + '_%s_%s_%s_%s_%s.dat' % (idv, istate, iproc, iflag, iav)
+                        infile = open(filename, 'r')
 
-                    line = infile.readline()
-                    parts = line.split(',')
-                    t1 = float(parts[0].strip())
-                    t3 = float(parts[1].strip())
-                    t5 = float(parts[2].strip())
+                        line = infile.readline()
+                        parts = line.split(',')
+                        t1 = float(parts[0].strip())
+                        t3 = float(parts[1].strip())
+                        t5 = float(parts[2].strip())
 
-                    t1_sum += t1
-                    t3_sum += t3
-                    t5_sum += t5
+                        t1_sum += t1
+                        t3_sum += t3
+                        t5_sum += t5
 
-                t1av = t1_sum / (iav + 1)
-                t3av = t3_sum / (iav + 1)
-                t5av = t5_sum / (iav + 1)
+                    t1av = t1_sum / (iav + 1)
+                    t3av = t3_sum / (iav + 1)
+                    t5av = t5_sum / (iav + 1)
 
-                data.append((idv, istate, iproc, t1av, t3av, t5av))
+                    data.append((idv, istate, iproc, iflag, t1av, t3av, t5av))
 
     filename = '%s_%s_%s.dat' % (name, mode, op)
 
@@ -169,8 +172,8 @@ def assemble_mpi_results():
     outfile.write('%s, %s, %s' % (nl, ln, drv))
     outfile.write('\n')
 
-    for ndv, nstate, nproc, t1, t3, t5 in data:
-        outfile.write('%d, %d, %d, %f, %f, %f' % (ndv, nstate, nproc, t1, t3, t5))
+    for ndv, nstate, nproc, nflag, t1, t3, t5 in data:
+        outfile.write('%d, %d, %d, %s, %f, %f, %f' % (ndv, nstate, nproc, nflag, t1, t3, t5))
         outfile.write('\n')
     outfile.close()
 

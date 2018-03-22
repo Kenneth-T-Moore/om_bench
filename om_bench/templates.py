@@ -65,7 +65,7 @@ from openmdao.utils.mpi import MPI
 
 from <module> import <classname>
 
-bench = <classname>(<ndv>, <nstate>, <nproc>, mode=<mode>, name='<name>')
+bench = <classname>(<ndv>, <nstate>, <nproc>, mode='<mode>', name='<name>')
 bench.time_linear = <time_linear>
 bench.time_driver = <time_driver>
 

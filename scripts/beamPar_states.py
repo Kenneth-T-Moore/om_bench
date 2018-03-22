@@ -41,7 +41,7 @@ if __name__ == "__main__":
     states = [item * 50 for item in states]
     procs = [1]
 
-    bench = BeamBench(desvars, states, procs, mode='rev', name='beam-par', use_flag=True)
+    bench = BeamBench(desvars, states, procs, mode='rev', name='beamPar', use_flag=True)
     bench.num_averages = 5
 
     bench.run_benchmark()
