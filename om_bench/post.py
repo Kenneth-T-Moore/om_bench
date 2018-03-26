@@ -9,7 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def post_process(filename, title):
+def post_process(filename, title, flagtxt="Insert Text Here"):
     """
     Read benchmark data and make scaling plots.
     """
@@ -27,12 +27,18 @@ def post_process(filename, title):
     t1 = np.empty((npt, ))
     t3 = np.empty((npt, ))
     t5 = np.empty((npt, ))
+    flag = np.empty((npt, ), dtype=np.bool)
     x_dv = np.empty((npt, ))
     x_state = np.empty((npt, ))
     x_proc = np.empty((npt, ))
 
     for j, line in enumerate(data):
-        x_dv[j], x_state[j], x_proc[j], _, t1[j], t3[j], t5[j] = line.strip().split(',')
+        x_dv[j], x_state[j], x_proc[j], flag[j], t1[j], t3[j], t5[j] = line.strip().split(',')
+
+    if np.any(flag):
+        use_flag = True
+    else:
+        use_flag = False
 
     # Times are all normalized.
     t1 = t1/t1[0]
@@ -49,38 +55,79 @@ def post_process(filename, title):
         x = x_proc
         xlab = "Number of processors."
 
-    # Generate plots
+    if use_flag:
 
-    if nl:
-        plt.figure(1)
-        plt.loglog(x, t1, 'o-')
+        # Split them up. We know the pattern.
+        t1T = t1[0::2]
+        t1F = t1[1::2]
+        t3T = t3[0::2]
+        t3F = t3[1::2]
+        t5T = t5[0::2]
+        t5F = t5[1::2]
 
-        plt.xlabel(xlab)
-        plt.ylabel('Nonlinear Solve: Normalized Time')
-        plt.title(title)
-        plt.grid(True)
-        plt.savefig("%s_%s_%s.png" % (name, mode, 'nl'))
+        xT = x[0::2]
+        xF = x[1::2]
 
-    if ln:
-        plt.figure(2)
-        plt.loglog(x, t3, 'o-')
+        # Generate plots
 
-        plt.xlabel(xlab)
-        plt.ylabel('Linear Solve: Normalized Time')
-        plt.title(title)
-        plt.grid(True)
-        plt.savefig("%s_%s_%s.png" % (name, mode, 'ln'))
-
-        # For procs, we also view the time/proc as a function of number of procs.
-        if mode == 'proc':
-            plt.figure(3)
-            plt.loglog(x, t3/x, 'o-')
+        if nl:
+            plt.figure(1)
+            plt.loglog(xF, t1F, 'bo-')
+            plt.loglog(xT, t1T, 'ro-')
 
             plt.xlabel(xlab)
-            plt.ylabel('Linear Solve: Normalized Time per Processor')
+            plt.ylabel('Nonlinear Solve: Normalized Time')
             plt.title(title)
             plt.grid(True)
-            plt.savefig("%s_%s_%s_per_proc.png" % (name, mode, 'ln'))
+            plt.legend(['Default', flagtxt], loc=0)
+            plt.savefig("%s_%s_%s.png" % (name, mode, 'nl'))
+
+        if ln:
+            plt.figure(2)
+            plt.loglog(xF, t3F, 'o-')
+            plt.loglog(xT, t3T, 'ro-')
+
+            plt.xlabel(xlab)
+            plt.ylabel('Linear Solve: Normalized Time')
+            plt.title(title)
+            plt.grid(True)
+            plt.legend(['Default', flagtxt], loc=0)
+            plt.savefig("%s_%s_%s.png" % (name, mode, 'ln'))
+
+    else:
+
+        # Generate plots
+
+        if nl:
+            plt.figure(1)
+            plt.loglog(x, t1, 'o-')
+
+            plt.xlabel(xlab)
+            plt.ylabel('Nonlinear Solve: Normalized Time')
+            plt.title(title)
+            plt.grid(True)
+            plt.savefig("%s_%s_%s.png" % (name, mode, 'nl'))
+
+        if ln:
+            plt.figure(2)
+            plt.loglog(x, t3, 'o-')
+
+            plt.xlabel(xlab)
+            plt.ylabel('Linear Solve: Normalized Time')
+            plt.title(title)
+            plt.grid(True)
+            plt.savefig("%s_%s_%s.png" % (name, mode, 'ln'))
+
+            # For procs, we also view the time/proc as a function of number of procs.
+            if mode == 'proc':
+                plt.figure(3)
+                plt.loglog(x, t3/x, 'o-')
+
+                plt.xlabel(xlab)
+                plt.ylabel('Linear Solve: Normalized Time per Processor')
+                plt.title(title)
+                plt.grid(True)
+                plt.savefig("%s_%s_%s_per_proc.png" % (name, mode, 'ln'))
 
     plt.show()
     print('done')
