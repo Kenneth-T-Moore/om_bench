@@ -24,7 +24,8 @@ class BeamBench(Bench):
 
         problem.model = MultipointBeamGroup(E=E, L=L, b=b, volume=volume, max_bending=max_bending,
                                             num_elements=num_elements,
-                                            num_cp=num_cp, num_load_cases=num_load_cases)
+                                            num_cp=num_cp, num_load_cases=num_load_cases
+                                            max_bending=max_bending)
 
     def post_run(problem):
         # Check stuff here.
