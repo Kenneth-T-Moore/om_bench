@@ -34,8 +34,8 @@ class BeamBench(Bench):
 if __name__ == "__main__":
 
     desvars = [1, 2, 4, 8, 16, 32]
-    desvars = [item * 50 for item in desvars]
-    states = [1]
+    desvars = [item * 4 for item in desvars]
+    states = [250]
     procs = [1]
 
     bench = BeamBench(desvars, states, procs, mode='rev', name='beam')
