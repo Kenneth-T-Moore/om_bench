@@ -19,7 +19,9 @@ def post_process(filename, title, flagtxt="Insert Text Here"):
     name = data[0].strip()
     mode = data[1].strip()
     ops = data[2].strip().split(',')
-    nl, ln, drv = (bool(item) for item in ops)
+    nl = 'True' in ops[0]
+    ln = 'True' in ops[1]
+    drv = 'True' in ops[2]
 
     data = data[3:]
     npt = len(data)
@@ -89,6 +91,18 @@ def post_process(filename, title, flagtxt="Insert Text Here"):
 
             plt.xlabel(xlab)
             plt.ylabel('Linear Solve: Normalized Time')
+            plt.title(title)
+            plt.grid(True)
+            plt.legend(['Default', flagtxt], loc=0)
+            plt.savefig("%s_%s_%s.png" % (name, mode, 'ln'))
+
+        if drv:
+            plt.figure(3)
+            plt.loglog(xF, t5F, 'o-')
+            plt.loglog(xT, t5T, 'ro-')
+
+            plt.xlabel(xlab)
+            plt.ylabel('Driver Execution: Normalized Time')
             plt.title(title)
             plt.grid(True)
             plt.legend(['Default', flagtxt], loc=0)

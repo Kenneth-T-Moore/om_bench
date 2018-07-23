@@ -203,7 +203,7 @@ class Bench(object):
                     t3_sum = 0.0
                     t5_sum = 0.0
                     for j in range(self.num_averages):
-                        t1, t3, t5 = self._run_nl_ln_drv(ndv, nstate, nproc, flag)
+                        t1, t3, t5 = self._run_nl_ln_drv(ndv, nstate, nproc, flag, use_mpi=False)
                         t1_sum += t1
                         t3_sum += t3
                         t5_sum += t5
