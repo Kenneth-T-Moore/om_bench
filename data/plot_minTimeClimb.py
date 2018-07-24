@@ -3,9 +3,11 @@ Create plots for the Beam problem benchmarks.
 """
 from __future__ import print_function
 
-from om_bench.post import post_process
+from om_bench.post import post_process, BenchPost
 
 
-filename = 'minTimeClimb_state_nl_drv.dat'
+filename = 'minTimeClimb_state_nl_ln_drv.dat'
 
-post_process(filename, 'Min Time Climb', flagtxt="Simultaneous Derivatives")
+bp = BenchPost()
+
+bp.post_process(filename, 'Min Time Climb', flagtxt="Simultaneous Derivatives")

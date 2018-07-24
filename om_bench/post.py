@@ -8,143 +8,144 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 
+class BenchPost(object):
 
-def post_process(filename, title, flagtxt="Insert Text Here"):
-    """
-    Read benchmark data and make scaling plots.
-    """
-    outfile = open(filename, 'r')
-    data = outfile.readlines()
+    def post_process(self, filename, title, flagtxt="Insert Text Here"):
+        """
+        Read benchmark data and make scaling plots.
+        """
+        outfile = open(filename, 'r')
+        data = outfile.readlines()
 
-    name = data[0].strip()
-    mode = data[1].strip()
-    ops = data[2].strip().split(',')
-    nl = 'True' in ops[0]
-    ln = 'True' in ops[1]
-    drv = 'True' in ops[2]
+        name = data[0].strip()
+        mode = data[1].strip()
+        ops = data[2].strip().split(',')
+        nl = 'True' in ops[0]
+        ln = 'True' in ops[1]
+        drv = 'True' in ops[2]
 
-    data = data[3:]
-    npt = len(data)
+        data = data[3:]
+        npt = len(data)
 
-    t1 = np.empty((npt, ))
-    t3 = np.empty((npt, ))
-    t5 = np.empty((npt, ))
-    flag = np.empty((npt, ), dtype=np.bool)
-    x_dv = np.empty((npt, ))
-    x_state = np.empty((npt, ))
-    x_proc = np.empty((npt, ))
+        t1 = np.empty((npt, ))
+        t3 = np.empty((npt, ))
+        t5 = np.empty((npt, ))
+        flag = np.empty((npt, ), dtype=np.bool)
+        x_dv = np.empty((npt, ))
+        x_state = np.empty((npt, ))
+        x_proc = np.empty((npt, ))
 
-    for j, line in enumerate(data):
-        x_dv[j], x_state[j], x_proc[j], flag[j], t1[j], t3[j], t5[j] = line.strip().split(',')
+        for j, line in enumerate(data):
+            x_dv[j], x_state[j], x_proc[j], flag[j], t1[j], t3[j], t5[j] = line.strip().split(',')
 
-    if np.any(flag):
-        use_flag = True
-    else:
-        use_flag = False
+        if np.any(flag):
+            use_flag = True
+        else:
+            use_flag = False
 
-    # Times are all normalized.
-    t1 = t1/t1[0]
-    t3 = t3/t3[0]
-    t5 = t5/t5[0]
+        # Times are all normalized.
+        t1 = t1/t1[0]
+        t3 = t3/t3[0]
+        t5 = t5/t5[0]
 
-    if mode == 'state':
-        x = x_state
-        xlab = "Normalized number of states."
-    elif mode == 'desvar':
-        xlab = "Normalized number of design vars."
-        x = x_dv
-    elif mode == 'proc':
-        x = x_proc
-        xlab = "Number of processors."
+        if mode == 'state':
+            x = x_state
+            xlab = "Normalized number of states."
+        elif mode == 'desvar':
+            xlab = "Normalized number of design vars."
+            x = x_dv
+        elif mode == 'proc':
+            x = x_proc
+            xlab = "Number of processors."
 
-    if use_flag:
+        if use_flag:
 
-        # Split them up. We know the pattern.
-        t1T = t1[0::2]
-        t1F = t1[1::2]
-        t3T = t3[0::2]
-        t3F = t3[1::2]
-        t5T = t5[0::2]
-        t5F = t5[1::2]
+            # Split them up. We know the pattern.
+            t1F = t1[0::2]
+            t1T = t1[1::2]
+            t3F = t3[0::2]
+            t3T = t3[1::2]
+            t5F = t5[0::2]
+            t5T = t5[1::2]
 
-        xT = x[0::2]
-        xF = x[1::2]
+            xT = x[0::2]
+            xF = x[1::2]
 
-        # Generate plots
+            # Generate plots
 
-        if nl:
-            plt.figure(1)
-            plt.loglog(xF, t1F, 'bo-')
-            plt.loglog(xT, t1T, 'ro-')
-
-            plt.xlabel(xlab)
-            plt.ylabel('Nonlinear Solve: Normalized Time')
-            plt.title(title)
-            plt.grid(True)
-            plt.legend(['Default', flagtxt], loc=0)
-            plt.savefig("%s_%s_%s.png" % (name, mode, 'nl'))
-
-        if ln:
-            plt.figure(2)
-            plt.loglog(xF, t3F, 'o-')
-            plt.loglog(xT, t3T, 'ro-')
-
-            plt.xlabel(xlab)
-            plt.ylabel('Linear Solve: Normalized Time')
-            plt.title(title)
-            plt.grid(True)
-            plt.legend(['Default', flagtxt], loc=0)
-            plt.savefig("%s_%s_%s.png" % (name, mode, 'ln'))
-
-        if drv:
-            plt.figure(3)
-            plt.loglog(xF, t5F, 'o-')
-            plt.loglog(xT, t5T, 'ro-')
-
-            plt.xlabel(xlab)
-            plt.ylabel('Driver Execution: Normalized Time')
-            plt.title(title)
-            plt.grid(True)
-            plt.legend(['Default', flagtxt], loc=0)
-            plt.savefig("%s_%s_%s.png" % (name, mode, 'ln'))
-
-    else:
-
-        # Generate plots
-
-        if nl:
-            plt.figure(1)
-            plt.loglog(x, t1, 'o-')
-
-            plt.xlabel(xlab)
-            plt.ylabel('Nonlinear Solve: Normalized Time')
-            plt.title(title)
-            plt.grid(True)
-            plt.savefig("%s_%s_%s.png" % (name, mode, 'nl'))
-
-        if ln:
-            plt.figure(2)
-            plt.loglog(x, t3, 'o-')
-
-            plt.xlabel(xlab)
-            plt.ylabel('Linear Solve: Normalized Time')
-            plt.title(title)
-            plt.grid(True)
-            plt.savefig("%s_%s_%s.png" % (name, mode, 'ln'))
-
-            # For procs, we also view the time/proc as a function of number of procs.
-            if mode == 'proc':
-                plt.figure(3)
-                plt.loglog(x, t3/x, 'o-')
+            if nl:
+                plt.figure(1)
+                plt.loglog(xF, t1F, 'bo-')
+                plt.loglog(xT, t1T, 'ro-')
 
                 plt.xlabel(xlab)
-                plt.ylabel('Linear Solve: Normalized Time per Processor')
+                plt.ylabel('Nonlinear Solve: Normalized Time')
                 plt.title(title)
                 plt.grid(True)
-                plt.savefig("%s_%s_%s_per_proc.png" % (name, mode, 'ln'))
+                plt.legend(['Default', flagtxt], loc=0)
+                plt.savefig("%s_%s_%s.png" % (name, mode, 'nl'))
 
-    plt.show()
-    print('done')
+            if ln:
+                plt.figure(2)
+                plt.loglog(xF, t3F, 'o-')
+                plt.loglog(xT, t3T, 'ro-')
+
+                plt.xlabel(xlab)
+                plt.ylabel('Linear Solve: Normalized Time')
+                plt.title(title)
+                plt.grid(True)
+                plt.legend(['Default', flagtxt], loc=0)
+                plt.savefig("%s_%s_%s.png" % (name, mode, 'ln'))
+
+            if drv:
+                plt.figure(3)
+                plt.loglog(xF, t5F, 'o-')
+                plt.loglog(xT, t5T, 'ro-')
+
+                plt.xlabel(xlab)
+                plt.ylabel('Driver Execution: Normalized Time')
+                plt.title(title)
+                plt.grid(True)
+                plt.legend(['Default', flagtxt], loc=0)
+                plt.savefig("%s_%s_%s.png" % (name, mode, 'ln'))
+
+        else:
+
+            # Generate plots
+
+            if nl:
+                plt.figure(1)
+                plt.loglog(x, t1, 'o-')
+
+                plt.xlabel(xlab)
+                plt.ylabel('Nonlinear Solve: Normalized Time')
+                plt.title(title)
+                plt.grid(True)
+                plt.savefig("%s_%s_%s.png" % (name, mode, 'nl'))
+
+            if ln:
+                plt.figure(2)
+                plt.loglog(x, t3, 'o-')
+
+                plt.xlabel(xlab)
+                plt.ylabel('Linear Solve: Normalized Time')
+                plt.title(title)
+                plt.grid(True)
+                plt.savefig("%s_%s_%s.png" % (name, mode, 'ln'))
+
+                # For procs, we also view the time/proc as a function of number of procs.
+                if mode == 'proc':
+                    plt.figure(3)
+                    plt.loglog(x, t3/x, 'o-')
+
+                    plt.xlabel(xlab)
+                    plt.ylabel('Linear Solve: Normalized Time per Processor')
+                    plt.title(title)
+                    plt.grid(True)
+                    plt.savefig("%s_%s_%s_per_proc.png" % (name, mode, 'ln'))
+
+        plt.show()
+        print('done')
 
 
 def assemble_mpi_results():
@@ -239,3 +240,11 @@ def assemble_mpi_results():
     outfile.close()
 
     print("done")
+
+
+# Legacy for older files.
+def post_process(filename, title, flagtxt="Insert Text Here"):
+
+    benchpost = BenchPost()
+    benchpost.post_process(filename=filename, title=title, flagtxt=flagtxt)
+

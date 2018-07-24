@@ -110,7 +110,7 @@ class MyBench(Bench):
 if __name__ == "__main__":
 
     desvars = [1]
-    states = [1, 2, 4, 6, 8, 12]
+    states = [1, 2, 4, 6, 12, 24, 48]
     states = [item * 10 for item in states]
     procs = [1]
 
