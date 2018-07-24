@@ -5,12 +5,22 @@ from __future__ import print_function
 
 import numpy as np
 
-from openmdao.api import pyOptSparseDriver, DirectSolver
+from openmdao.api import DirectSolver, pyOptSparseDriver
+import openmdao.utils.coloring as coloring_mod
 
 from dymos import Phase
 from dymos.examples.min_time_climb.min_time_climb_ode import MinTimeClimbODE
 
 from om_bench.bench import Bench
+
+class ColoringOnly(pyOptSparseDriver):
+
+    def run(self):
+        """
+        Only does coloring when requested.
+        """
+        if self.options['dynamic_simul_derivs']:
+            coloring_mod.dynamic_simul_coloring(self, do_sparsity=True)
 
 
 class MyBench(Bench):
@@ -100,13 +110,13 @@ class MyBench(Bench):
 if __name__ == "__main__":
 
     desvars = [1]
-    states = [1, 2, 4, 8]
+    states = [1, 2]#, 4, 8]
     states = [item * 10 for item in states]
     procs = [1]
 
     bench = MyBench(desvars, states, procs, mode='auto', name='minTimeClimb', use_flag=True)
-    bench.num_averages = 1
-    bench.time_linear = False
+    bench.num_averages = 5
+    bench.time_linear = True
     bench.time_driver = True
 
     bench.run_benchmark()
