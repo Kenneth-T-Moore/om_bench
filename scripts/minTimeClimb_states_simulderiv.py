@@ -2,6 +2,7 @@
 Generate benchmarking data for the minTimeClimb problem.
 """
 from __future__ import print_function
+import os
 
 import numpy as np
 
@@ -87,8 +88,6 @@ class MyBench(Bench):
         p.model.options['assembled_jac_type'] = top_level_jacobian.lower()
         p.model.linear_solver = DirectSolver(assemble_jac=True)
 
-        p.setup(check=True, force_alloc_complex=force_alloc_complex)
-
     def post_setup(self, prob, ndv, nstate, nproc, flag):
         phase = self.phase
 
@@ -101,6 +100,10 @@ class MyBench(Bench):
         prob['phase0.states:gam'] = phase.interpolate(ys=[0.0, 0.0], nodes='state_input')
         prob['phase0.states:m'] = phase.interpolate(ys=[19030.468, 16841.431], nodes='state_input')
         prob['phase0.controls:alpha'] = phase.interpolate(ys=[0.0, 0.0], nodes='control_input')
+
+        # Clean out coloring
+        if os.path.exists('coloring.json'):
+            os.remove('coloring.json')
 
     def post_run(problem):
         # Check stuff here.
