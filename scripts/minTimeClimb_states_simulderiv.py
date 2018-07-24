@@ -114,7 +114,7 @@ if __name__ == "__main__":
     states = [item * 10 for item in states]
     procs = [1]
 
-    bench = MyBench(desvars, states, procs, mode='auto', name='minTimeClimb', use_flag=True)
+    bench = MyBench(desvars, states, procs, mode='fwd', name='minTimeClimb', use_flag=True)
     bench.num_averages = 5
     bench.time_linear = True
     bench.time_driver = True

@@ -10,10 +10,21 @@ import matplotlib.pyplot as plt
 
 class BenchPost(object):
 
-    def post_process(self, filename, title, flagtxt="Insert Text Here"):
+    def __init__(self, title):
+        self.title = title
+
+        self.flagtxt = "Insert Text Here"
+        self.title_driver = "Driver Execution"
+
+        # In this mode, we want to do a three way comparison.
+        self.special_plot_driver_on_linear = False
+
+    def post_process(self, filename):
         """
         Read benchmark data and make scaling plots.
         """
+        title = self.title
+
         outfile = open(filename, 'r')
         data = outfile.readlines()
 
@@ -27,16 +38,16 @@ class BenchPost(object):
         data = data[3:]
         npt = len(data)
 
-        t1 = np.empty((npt, ))
-        t3 = np.empty((npt, ))
-        t5 = np.empty((npt, ))
+        t1u = np.empty((npt, ))
+        t3u = np.empty((npt, ))
+        t5u = np.empty((npt, ))
         flag = np.empty((npt, ), dtype=np.bool)
         x_dv = np.empty((npt, ))
         x_state = np.empty((npt, ))
         x_proc = np.empty((npt, ))
 
         for j, line in enumerate(data):
-            x_dv[j], x_state[j], x_proc[j], flag[j], t1[j], t3[j], t5[j] = line.strip().split(',')
+            x_dv[j], x_state[j], x_proc[j], flag[j], t1u[j], t3u[j], t5u[j] = line.strip().split(',')
 
         if np.any(flag):
             use_flag = True
@@ -44,9 +55,9 @@ class BenchPost(object):
             use_flag = False
 
         # Times are all normalized.
-        t1 = t1/t1[0]
-        t3 = t3/t3[0]
-        t5 = t5/t5[0]
+        t1 = t1u/t1u[0]
+        t3 = t3u/t3u[0]
+        t5 = t5u/t5u[0]
 
         if mode == 'state':
             x = x_state
@@ -59,6 +70,8 @@ class BenchPost(object):
             xlab = "Number of processors."
 
         if use_flag:
+
+            flagtxt = self.flagtxt
 
             # Split them up. We know the pattern.
             t1F = t1[0::2]
@@ -91,7 +104,7 @@ class BenchPost(object):
                 plt.loglog(xT, t3T, 'ro-')
 
                 plt.xlabel(xlab)
-                plt.ylabel('Linear Solve: Normalized Time')
+                plt.ylabel('Compute Totals: Normalized Time')
                 plt.title(title)
                 plt.grid(True)
                 plt.legend(['Default', flagtxt], loc=0)
@@ -103,11 +116,30 @@ class BenchPost(object):
                 plt.loglog(xT, t5T, 'ro-')
 
                 plt.xlabel(xlab)
-                plt.ylabel('Driver Execution: Normalized Time')
+                plt.ylabel(self.title_driver + ': Normalized Time')
                 plt.title(title)
                 plt.grid(True)
                 plt.legend(['Default', flagtxt], loc=0)
-                plt.savefig("%s_%s_%s.png" % (name, mode, 'ln'))
+                plt.savefig("%s_%s_%s.png" % (name, mode, 'drv'))
+
+            if self.special_plot_driver_on_linear:
+
+                # Plot whatever driver does (e.g., coloring) on the same axis and normalization as linear time.
+                t5 = t5u/t3u[0]
+                t5F = t5[0::2]
+                t5T = t5[1::2]
+
+                plt.figure(4)
+                plt.loglog(xF, t3F, 'o-')
+                plt.loglog(xT, t3T, 'ro-')
+                plt.loglog(xT, t5T, 'mo-')
+
+                plt.xlabel(xlab)
+                plt.ylabel('Normalized Time')
+                plt.title(title)
+                plt.grid(True)
+                plt.legend(['Compute Totals', 'Compute Totals: ' + flagtxt, self.title_driver], loc=0)
+                plt.savefig("%s_%s_%s.png" % (name, mode, 'spec1'))
 
         else:
 
@@ -128,7 +160,7 @@ class BenchPost(object):
                 plt.loglog(x, t3, 'o-')
 
                 plt.xlabel(xlab)
-                plt.ylabel('Linear Solve: Normalized Time')
+                plt.ylabel('Compute Totals: Normalized Time')
                 plt.title(title)
                 plt.grid(True)
                 plt.savefig("%s_%s_%s.png" % (name, mode, 'ln'))
@@ -139,7 +171,7 @@ class BenchPost(object):
                     plt.loglog(x, t3/x, 'o-')
 
                     plt.xlabel(xlab)
-                    plt.ylabel('Linear Solve: Normalized Time per Processor')
+                    plt.ylabel('Compute Totals: Normalized Time per Processor')
                     plt.title(title)
                     plt.grid(True)
                     plt.savefig("%s_%s_%s_per_proc.png" % (name, mode, 'ln'))
@@ -245,6 +277,7 @@ def assemble_mpi_results():
 # Legacy for older files.
 def post_process(filename, title, flagtxt="Insert Text Here"):
 
-    benchpost = BenchPost()
-    benchpost.post_process(filename=filename, title=title, flagtxt=flagtxt)
+    benchpost = BenchPost(title)
+    benchpost.flagtxt = flagtxt
+    benchpost.post_process(filename=filename)
 
