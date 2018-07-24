@@ -20,6 +20,10 @@ class Bench(object):
     """
     Attributes
     ----------
+    ln_of : bool
+        Allows override of 'of' list during compute_totals. Default is None, which uses driver vars.
+    ln_wrt : bool
+        Allows override of 'wrt' list during compute_totals. Default is None, which uses driver vars.
     mode : str
         Derivatives mode string passed into openmdao setup. Can be ('fwd', 'rev')
     num_averages : int
@@ -106,6 +110,10 @@ class Bench(object):
         self.time_driver = False
         self.single_batch = False
         self.mode = mode
+
+        # Custom specification of of/wrt for linear solution.
+        self.ln_of = None
+        self.ln_wrt = None
 
         self.base_dir = os.getcwd()
 
@@ -203,7 +211,7 @@ class Bench(object):
                     t3_sum = 0.0
                     t5_sum = 0.0
                     for j in range(self.num_averages):
-                        t1, t3, t5 = self._run_nl_ln_drv(ndv, nstate, nproc, flag, use_mpi=False)
+                        t1, t3, t5 = self._run_nl_ln_drv(ndv, nstate, nproc, flag)
                         t1_sum += t1
                         t3_sum += t3
                         t5_sum += t5
@@ -308,7 +316,7 @@ class Bench(object):
 
         print("All jobs submitted.")
 
-    def _run_nl_ln_drv(self, ndv, nstate, nproc, flag, use_mpi=True):
+    def _run_nl_ln_drv(self, ndv, nstate, nproc, flag):
         """
         Benchmark a single point.
 
@@ -324,23 +332,13 @@ class Bench(object):
             Number of processors requested.
         flag : bool
             User assignable flag that will be False or True.
-        use_mpi : bool
-            When True, setup the problem with the PetscVector.
         """
         prob = Problem()
 
         # User hook pre setup
         self.setup(prob, ndv, nstate, nproc, flag)
 
-        if use_mpi:
-            from openmdao.api import PETScVector
-            vector_class = PETScVector
-        else:
-            from openmdao.vectors.default_vector import DefaultVector
-            vector_class = DefaultVector
-
-        vector_class = PETScVector if use_mpi else DefaultVector
-        prob.setup(vector_class=vector_class, mode=self.mode)
+        prob.setup(mode=self.mode)
 
         # User hook post setup
         self.post_setup(prob, ndv, nstate, nproc, flag)
@@ -353,14 +351,6 @@ class Bench(object):
         t1 = time() - t0
         print("Nonlinear Execution complete:", t1, 'sec')
 
-        if self.time_linear:
-            t2 = time()
-            prob.compute_totals()
-            t3 = time() - t2
-            print("Linear Execution complete:", t3, 'sec')
-        else:
-            t3 = 0.0
-
         if self.time_driver:
             t4 = time()
             prob.run_driver()
@@ -368,6 +358,14 @@ class Bench(object):
             print("Driver Execution complete:", t5, 'sec')
         else:
             t5 = 0.0
+
+        if self.time_linear:
+            t2 = time()
+            prob.compute_totals(of=self.ln_of, wrt=self.ln_wrt, return_format='dict')
+            t3 = time() - t2
+            print("Linear Execution complete:", t3, 'sec')
+        else:
+            t3 = 0.0
 
         self.post_run()
 
