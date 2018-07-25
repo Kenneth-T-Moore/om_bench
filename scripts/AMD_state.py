@@ -94,7 +94,7 @@ class MyBench(Bench):
             ref_area_m2=ref_area_m2, Wac_1e6_N=Wac_1e6_N, Mach_mode=Mach_mode,
             propulsion_model=propulsion_model, aerodynamics_model=aerodynamics_model,
             initial_mission_vars=initial_mission_vars,
-            paralell_derivs = par_derivs,
+            parallel_derivs = par_derivs,
         )
 
         snopt_file_name = 'SNOPT_print_amd.out'
