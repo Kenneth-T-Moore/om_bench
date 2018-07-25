@@ -43,4 +43,4 @@ if __name__ == "__main__":
     bench.walltime = 1
     bench.single_batch = True
 
-    bench.run_benchmark_mpi(walltime=8)
+    bench.run_benchmark_mpi()

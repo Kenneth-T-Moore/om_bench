@@ -128,7 +128,7 @@ if __name__ == "__main__":
     bench.time_driver = False
     bench.single_batch = True
 
-    bench.run_benchmark_mpi()
+    bench.run_benchmark_mpi(walltime=2)
 
 
 
