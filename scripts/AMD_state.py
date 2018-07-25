@@ -37,6 +37,8 @@ class MyBench(Bench):
 
         par_derivs = flag
 
+        allocation_data['num_pt'] = nstate * np.ones(128, int)
+
         base_dir = amd_om.__file__.split('amd_om/__init__')[0]
         this_dir = os.path.join(base_dir, 'run_scripts/AMD/L3_128_route/')
         grid_dir = os.path.join(base_dir, 'grids/')
@@ -117,16 +119,16 @@ class MyBench(Bench):
 if __name__ == "__main__":
 
     desvars = [1]
-    states = [1, 2]
-    states = [item * 10 for item in states]
-    procs = [1]
+    states = [100, 50]
+    procs = [140]
 
-    bench = MyBench(desvars, states, procs, mode='auto', name='minTimeClimb', use_flag=True)
+    bench = MyBench(desvars, states, procs, mode='auto', name='AMD', use_flag=True)
     bench.num_averages = 1
     bench.time_linear = True
     bench.time_driver = False
+    bench.single_batch = True
 
-    bench.run_benchmark()
+    bench.run_benchmark_mpi()
 
 
 

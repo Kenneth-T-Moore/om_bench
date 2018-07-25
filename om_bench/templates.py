@@ -56,7 +56,7 @@ unset USE_PROC_FILES
 
 cd <local>
 
-mpiexec python -u <name>.py
+<commands>
 """
 
 

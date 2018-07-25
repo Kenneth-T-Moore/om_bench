@@ -13,7 +13,7 @@ import numpy as np
 
 from openmdao.core.problem import Problem
 
-from om_bench.templates import qsub_template, run_template, qsub_template_single_file
+from om_bench.templates import qsub_template, run_template, qsub_template_single_file, qsub_template_amd
 
 
 class Bench(object):
@@ -457,7 +457,8 @@ class Bench(object):
         """
         Output PBS run submission file using template, but running all python scripts in one file.
         """
-        tp = qsub_template_single_file
+        #tp = qsub_template_single_file
+        tp = qsub_template_amd
         proc_node = 24.0
 
         tp = tp.replace('<name>', name)
