@@ -127,6 +127,7 @@ if __name__ == "__main__":
     bench.time_linear = True
     bench.time_driver = False
     bench.single_batch = True
+    bench.auto_queue_submit = False
 
     bench.run_benchmark_mpi(walltime=2)
 

@@ -110,6 +110,7 @@ class Bench(object):
         self.time_driver = False
         self.single_batch = False
         self.mode = mode
+        self.auto_queue_submit = True
 
         # Custom specification of of/wrt for linear solution.
         self.ln_of = None
@@ -303,7 +304,8 @@ class Bench(object):
                                 self._prepare_pbs_job(ndv, nstate, nproc, j, name)
 
                                 # Submit job
-                                p = subprocess.Popen(["qsub", '%s.sh' % name])
+                                if self.auto_queue_submit:
+                                    p = subprocess.Popen(["qsub", '%s.sh' % name])
 
         if self.single_batch is True:
             name = '_%s_%s_%s_all' % (self._name, mode, op)
@@ -312,7 +314,8 @@ class Bench(object):
             self._prepare_pbs_job_single_file(procs, name, commands)
 
             # Submit job
-            p = subprocess.Popen(["qsub", '%s.sh' % name])
+            if self.auto_queue_submit:
+                p = subprocess.Popen(["qsub", '%s.sh' % name])
 
         print("All jobs submitted.")
 

@@ -69,7 +69,7 @@ bench.time_driver = <time_driver>
 
 print('Running: dv=<ndv>, state=<nstate>, proc=<nproc>, flag=<flag>, av=<average>')
 
-t1, t3, t5 = bench._run_nl_ln_drv(<ndv>, <nstate>, <nproc>, <flag>, use_mpi=True)
+t1, t3, t5 = bench._run_nl_ln_drv(<ndv>, <nstate>, <nproc>, <flag>)
 
 if (MPI and MPI.COMM_WORLD.rank == 0) or not MPI:
     outname = '%s.dat' % '<filename>'
