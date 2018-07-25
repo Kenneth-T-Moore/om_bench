@@ -50,7 +50,7 @@ qsub_template_amd = """
 #PBS -m bae
 #PBS -o stdout_<name>.out
 #PBS -e stderr_<name>.out
-#PBS -q devel
+#PBS -q normal
 
 cd <local>
 

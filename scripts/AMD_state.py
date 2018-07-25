@@ -119,17 +119,17 @@ class MyBench(Bench):
 if __name__ == "__main__":
 
     desvars = [1]
-    states = [100, 50]
+    states = [20, 50, 100, 200, 400]
     procs = [140]
 
     bench = MyBench(desvars, states, procs, mode='auto', name='AMD', use_flag=True)
-    bench.num_averages = 1
+    bench.num_averages = 5
     bench.time_linear = True
     bench.time_driver = False
     bench.single_batch = True
     bench.auto_queue_submit = False
 
-    bench.run_benchmark_mpi(walltime=2)
+    bench.run_benchmark_mpi(walltime=8)
 
 
 
