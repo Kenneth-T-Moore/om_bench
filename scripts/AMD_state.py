@@ -126,9 +126,10 @@ if __name__ == "__main__":
     bench.num_averages = 1
     bench.time_linear = True
     bench.time_driver = False
-    bench.single_batch = True
+    #bench.single_batch = True
 
-    bench.run_benchmark_mpi(walltime=2)
+    bench.run_benchmark()
+    #bench.run_benchmark_mpi(walltime=2)
 
 
 
