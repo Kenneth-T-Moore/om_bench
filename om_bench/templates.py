@@ -52,8 +52,6 @@ qsub_template_amd = """
 #PBS -e stderr_<name>.out
 #PBS -q devel
 
-unset USE_PROC_FILES
-
 cd <local>
 
 <commands>
