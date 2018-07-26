@@ -61,9 +61,9 @@ class BenchPost(object):
 
         if mode == 'state':
             x = x_state
-            xlab = "Normalized number of states."
+            xlab = "Number of states."
         elif mode == 'desvar':
-            xlab = "Normalized number of design vars."
+            xlab = "Number of design vars."
             x = x_dv
         elif mode == 'proc':
             x = x_proc

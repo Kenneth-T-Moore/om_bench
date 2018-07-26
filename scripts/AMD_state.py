@@ -129,7 +129,7 @@ if __name__ == "__main__":
     bench.single_batch = True
     bench.auto_queue_submit = False
 
-    bench.run_benchmark_mpi(walltime=8)
+    bench.run_benchmark_mpi(walltime=10)
 
 
 
