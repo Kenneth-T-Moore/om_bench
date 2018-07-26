@@ -105,7 +105,7 @@ class MyBench(Bench):
         if os.path.exists('coloring.json'):
             os.remove('coloring.json')
 
-    def post_run(problem):
+    def post_run(self, prob, ndv, nstate, nproc, flag):
         # Check stuff here.
         pass
 
