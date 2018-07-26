@@ -116,9 +116,9 @@ class Turbojet(Group):
         balance = self.add_subsystem('balance', BalanceComp())
         if design:
 
-            balance.add_balance('W', units='lbm/s', eq_units='lbf')
-            self.connect('balance.W', 'inlet.Fl_I:stat:W')
-            self.connect('perf.Fn', 'balance.lhs:W')
+            #balance.add_balance('W', units='lbm/s', eq_units='lbf')
+            #self.connect('balance.W', 'inlet.Fl_I:stat:W')
+            #self.connect('perf.Fn', 'balance.lhs:W')
 
             balance.add_balance('FAR', eq_units='degR', lower=1e-4, val=.017)
             self.connect('balance.FAR', 'burner.Fl_I:FAR')
@@ -141,9 +141,9 @@ class Turbojet(Group):
             self.connect('balance.Nmech', 'Nmech')
             self.connect('shaft.pwr_net', 'balance.lhs:Nmech')
 
-            balance.add_balance('W', val=168.0, units='lbm/s', eq_units=None, rhs_val=2.0)
-            self.connect('balance.W', 'inlet.Fl_I:stat:W')
-            self.connect('comp.map.RlineMap', 'balance.lhs:W')
+            #balance.add_balance('W', val=168.0, units='lbm/s', eq_units=None, rhs_val=2.0)
+            #self.connect('balance.W', 'inlet.Fl_I:stat:W')
+            #self.connect('comp.map.RlineMap', 'balance.lhs:W')
 
             self.set_order(['balance', 'fc', 'inlet', 'duct1', 'comp', 'burner', 'turb', 'ab', 'nozz', 'shaft', 'perf'])
 
@@ -236,6 +236,10 @@ class MyBench(Bench):
             des_vars.add_output('comp:cool2:frac_work', 1.0),
             des_vars.add_output('turb:cool1:frac_P', 1.0),
             des_vars.add_output('turb:cool2:frac_P', 0.0),
+
+            des_vars.add_output('W', 0.0)
+            prob.model.connect('W', 'DESIGN.inlet.Fl_I:stat:W')
+
             # OFF DESIGN 1
 
             des_vars.add_output('OD1_MN', 0.000001),
@@ -291,7 +295,7 @@ class MyBench(Bench):
 
             prob.model.connect('alt', 'DESIGN.fc.alt')
             prob.model.connect('MN', 'DESIGN.fc.MN')
-            prob.model.connect('Fn_des', 'DESIGN.balance.rhs:W')
+            #prob.model.connect('Fn_des', 'DESIGN.balance.rhs:W')
             prob.model.connect('T4max', 'DESIGN.balance.rhs:FAR')
 
             prob.model.connect('duct1:dPqP', 'DESIGN.duct1.dPqP')
@@ -371,10 +375,19 @@ class MyBench(Bench):
                     prob.model.connect('DESIGN.ab.Fl_O:stat:area', pt+'.ab.area')
 
                 prob.model.connect(pt+'_T4', pt+'.balance.rhs:FAR')
-                prob.model.connect(pt+'_Rline', pt+'.balance.rhs:W')
-                prob.model.connect(pt+'_ab_FAR', pt+'.ab.Fl_I:FAR')
+                #prob.model.connect(pt+'_Rline', pt+'.balance.rhs:W')
+                prob.model.connect('W', pt+'.inlet.Fl_I:stat:W')
 
             prob.model.linear_solver = DirectSolver(assemble_jac=flag)
+
+            prob.model.add_design_var('T4max')
+            #prob.model.add_design_var('T4max')
+            prob.model.add_design_var('W')
+            prob.model.add_design_var('ab:FAR')
+            prob.model.add_objective('DESIGN.perf.TSFC')
+            prob.model.add_constraint('W', upper=150.0)
+            for pt in pts:
+                prob.model.add_constraint(pt + '.perf.Fn', equals=11800)
 
         # N+3 Model
         elif nstate == 29689:
@@ -767,7 +780,7 @@ class MyBench(Bench):
         if nstate == 6317:
             # initial guesses
             prob['DESIGN.balance.FAR'] = 0.0175506829934
-            prob['DESIGN.balance.W'] = 168.453135137
+            prob['W'] = 168.453135137
             prob['DESIGN.balance.turb_PR'] = 4.46138725662
             prob['DESIGN.fc.balance.Pt'] = 14.6955113159
             prob['DESIGN.fc.balance.Tt'] = 518.665288153
@@ -776,7 +789,7 @@ class MyBench(Bench):
             for pt in pts:
 
                 # OD3 Guesses
-                prob[pt+'.balance.W'] = 166.073
+                #prob[pt+'.balance.W'] = 166.073
                 prob[pt+'.balance.FAR'] = 0.01680
                 prob[pt+'.balance.Nmech'] = 8197.38
                 prob[pt+'.fc.balance.Pt'] = 15.703
@@ -1087,7 +1100,7 @@ if __name__ == "__main__":
 
     # These are model numbers. Just generating a chart.
     states = [1143, 6317, 29689]
-    states = [29689]
+    states = [6317]
     procs = [1]
 
     bench = MyBench(desvars, states, procs, mode='fwd', name='pycycleMisc', use_flag=True)

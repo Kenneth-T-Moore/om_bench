@@ -94,6 +94,8 @@ class Bench(object):
             self._run_mode = 'state'
         elif nproc > 1:
             self._run_mode = 'proc'
+        else:
+            self._run_mode = 'state'
 
         self._name = name
         #self.basedir = basedir
