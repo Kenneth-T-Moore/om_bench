@@ -405,6 +405,7 @@ class MyBench(Bench):
             des_vars.add_output('duct25:dPqP', 0.0150),
             des_vars.add_output('hpc:PRdes', 14.103),
             des_vars.add_output('OPR', 53.6332) #53.635)
+            des_vars.add_output('OPR_simple', 55.0)
             des_vars.add_output('hpc:effDes', 0.847001),
             des_vars.add_output('hpc:effPoly', 0.89),
             des_vars.add_output('burner:dPqP', 0.0400),
