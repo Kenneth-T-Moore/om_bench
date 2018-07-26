@@ -370,7 +370,7 @@ class Bench(object):
         else:
             t3 = 0.0
 
-        self.post_run()
+        self.post_run(prob, ndv, nstate, nproc, flag)
 
         return t1, t3, t5
 
