@@ -1101,7 +1101,7 @@ if __name__ == "__main__":
 
     # These are model numbers. Just generating a chart.
     states = [1143, 6317, 29689]
-    states = [6317]
+    states = [29689]
     procs = [1]
 
     bench = MyBench(desvars, states, procs, mode='fwd', name='pycycleMisc', use_flag=True)
