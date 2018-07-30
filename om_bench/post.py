@@ -231,7 +231,7 @@ def assemble_mpi_results():
     for idv in sorted(dv):
         for istate in sorted(state):
             for iproc in sorted(proc):
-                for iflag in flag:
+                for iflag in sorted(flag):
 
                     t1_sum = 0.0
                     t3_sum = 0.0

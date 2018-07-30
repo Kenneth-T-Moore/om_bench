@@ -204,6 +204,15 @@ class MyBench(Bench):
 
             prob.model.linear_solver = DirectSolver(assemble_jac=flag)
 
+            newton = prob.model.nonlinear_solver = NewtonSolver()
+            newton.options['atol'] = 1e-6
+            newton.options['rtol'] = 1e-6
+            newton.options['iprint'] = 2
+            newton.options['maxiter'] = 20
+            newton.options['solve_subsystems'] = True
+            newton.options['max_sub_solves'] = 10
+            newton.options['err_on_maxiter'] = True
+
         # J79 model
         elif nstate == 6317:
             des_vars = prob.model.add_subsystem('des_vars', IndepVarComp(), promotes=["*"])
@@ -779,13 +788,19 @@ class MyBench(Bench):
 
     def post_setup(self, prob, ndv, nstate, nproc, flag):
 
-        if nstate == 6317:
+        if nstate == 1143:
+            prob.model.design.linear_solver = DirectSolver(assemble_jac=flag)
+
+        elif nstate == 6317:
             # initial guesses
             prob['DESIGN.balance.FAR'] = 0.0175506829934
             prob['W'] = 168.453135137
             prob['DESIGN.balance.turb_PR'] = 4.46138725662
             prob['DESIGN.fc.balance.Pt'] = 14.6955113159
             prob['DESIGN.fc.balance.Tt'] = 518.665288153
+
+            prob.model.DESIGN.linear_solver = DirectSolver(assemble_jac=flag)
+            prob.model.OD1.linear_solver = DirectSolver(assemble_jac=flag)
 
             pts = ['OD1']
             for pt in pts:
@@ -864,6 +879,8 @@ class MyBench(Bench):
         # Check stuff here.
 
         if nstate == 1143:
+
+            from openmdao.utils.units import convert_units as cu
 
             print("foo FS Fl_O:tot:P", prob['design.fc.Fl_O:tot:P'])
             print("foo FS Fl_O:stat:P", prob['design.fc.Fl_O:stat:P'])
@@ -1107,7 +1124,54 @@ if __name__ == "__main__":
 
     bench = MyBench(desvars, states, procs, mode='fwd', name='pycycleMisc', use_flag=True)
     bench.num_averages = 1
-    bench.time_linear = True
+    bench.time_linear = False
     bench.time_driver = False
 
     bench.run_benchmark()
+
+"""
+Propulsor (design group)
+------------------------
+1143 states
+106 Components
+38 Groups
+439 Variables
+
+Matrix Free
+  Assembly: 9.84 sec
+  LU Fact: 0.0255 sec
+
+Assembled Jacobian (sparse)
+  Assembly: .000627 sec
+  LU Fact:  .00214 sec
+
+J79 (Design group)
+------------------
+6317 states
+469 Components
+157 Groups
+2016 Variables
+
+Matrix Free
+  Assembly: 102.3 sec
+  LU Fact: 0.350 sec
+
+Assembled Jacobian (sparse)
+  Assembly: .00874 sec
+  LU Fact:  .00756 sec
+
+N+3 MDP
+-------
+29689 states
+2325 Components
+750 Groups
+9590 Variables
+
+Matrix Free
+  Assembly: 224 sec
+  LU Fact: 202 sec
+
+Assembled Jacobian (sparse)
+  Assembly: 0.00473 sec
+  LU Fact:  0.0878 sec
+"""
