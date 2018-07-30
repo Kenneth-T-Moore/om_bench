@@ -66,6 +66,8 @@ from <module> import <classname>
 bench = <classname>(<ndv>, <nstate>, <nproc>, mode='<mode>', name='<name>')
 bench.time_linear = <time_linear>
 bench.time_driver = <time_driver>
+bench.ln_of = <of_list>
+bench.ln_wrt = <wrt_list>
 
 print('Running: dv=<ndv>, state=<nstate>, proc=<nproc>, flag=<flag>, av=<average>')
 

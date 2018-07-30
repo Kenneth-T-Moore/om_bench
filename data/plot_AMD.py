@@ -8,7 +8,7 @@ from om_bench.post import post_process, BenchPost
 
 filename = 'AMD_state_nl_ln.dat'
 
-bp = BenchPost('Min Time Climb')
+bp = BenchPost('AMD 128 Routes')
 bp.flagtxt = "Parallel Derivatives"
 
 bp.post_process(filename)

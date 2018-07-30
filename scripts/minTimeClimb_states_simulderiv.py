@@ -102,8 +102,8 @@ class MyBench(Bench):
         prob['phase0.controls:alpha'] = phase.interpolate(ys=[0.0, 0.0], nodes='control_input')
 
         # Clean out coloring
-        if os.path.exists('coloring.json'):
-            os.remove('coloring.json')
+        #if os.path.exists('coloring.json'):
+        #    os.remove('coloring.json')
 
     def post_run(self, prob, ndv, nstate, nproc, flag):
         # Check stuff here.
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     procs = [1]
 
     bench = MyBench(desvars, states, procs, mode='auto', name='minTimeClimb', use_flag=True)
-    bench.num_averages = 2
+    bench.num_averages = 1
     bench.time_linear = True
     bench.time_driver = True
     bench.single_batch = True
@@ -129,7 +129,7 @@ if __name__ == "__main__":
     bench.ln_wrt = ['phase0.t_duration', 'phase0.controls:alpha', 'phase0.states:h', 'phase0.states:gam', 'phase0.states:r', 'phase0.states:m', 'phase0.states:v']
 
     #bench.run_benchmark()
-    bench.run_benchmark_mpi(walltime=16)
+    bench.run_benchmark_mpi(walltime=8)
 
 
 

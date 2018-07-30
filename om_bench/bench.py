@@ -412,6 +412,8 @@ class Bench(object):
         tp = tp.replace('<mode>', self.mode)
         tp = tp.replace('<time_linear>', str(self.time_linear))
         tp = tp.replace('<time_driver>', str(self.time_driver))
+        tp = tp.replace('<of_list>', str(self.ln_of))
+        tp = tp.replace('<wrt_list>', str(self.ln_wrt))
 
         outname = '%s.py' % name
         outfile = open(outname, 'w')
