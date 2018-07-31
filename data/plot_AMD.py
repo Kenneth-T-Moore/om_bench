@@ -10,5 +10,6 @@ filename = 'AMD_state_nl_ln.dat'
 
 bp = BenchPost('AMD 128 Routes')
 bp.flagtxt = "Parallel Derivatives"
+bp.equal_axis = True
 
 bp.post_process(filename)
