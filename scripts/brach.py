@@ -89,11 +89,11 @@ class MyBench(Bench):
 if __name__ == "__main__":
 
     desvars = [1]
-    states = [1, 2, 4, 6, 12, 24, 48]#, 100, 200, 500]
+    states = [1, 2, 4, 6, 12, 24, 48, 100, 200, 500, 1000]
     states = [item * 10 for item in states]
     procs = [1]
 
-    bench = MyBench(desvars, states, procs, mode='auto', name='minTimeClimb', use_flag=True)
+    bench = MyBench(desvars, states, procs, mode='auto', name='brach', use_flag=True)
     bench.num_averages = 1
     bench.time_linear = True
     bench.time_driver = True
