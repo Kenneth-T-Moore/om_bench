@@ -1130,8 +1130,8 @@ if __name__ == "__main__":
     bench.run_benchmark()
 
 """
-Propulsor (design group)
-------------------------
+Propulsor
+---------
 1143 states
 106 Components
 38 Groups
@@ -1145,8 +1145,8 @@ Assembled Jacobian (sparse)
   Assembly: .000627 sec
   LU Fact:  .00214 sec
 
-J79 (Design group)
-------------------
+J79
+---
 6317 states
 469 Components
 157 Groups
