@@ -89,7 +89,7 @@ class MyBench(Bench):
 if __name__ == "__main__":
 
     desvars = [1]
-    states = [1, 2, 4, 6, 12, 24, 48, 100, 200, 500, 1000]
+    states = [1, 2, 4, 6, 12, 24, 48, 100, 200, 500]
     states = [item * 10 for item in states]
     procs = [1]
 
@@ -99,6 +99,7 @@ if __name__ == "__main__":
     bench.time_driver = True
     bench.single_batch = True
     bench.auto_queue_submit = False
+    bench.sub_timing = True
 
     # Hardcode of/wrt to remove linear constraints form consideration.
     bench.ln_of  = ['phase0.time', 'phase0.collocation_constraint.defects:y', 'phase0.collocation_constraint.defects:x', 'phase0.collocation_constraint.defects:v', 'phase0.continuity_comp.defect_controls:theta', 'phase0.continuity_comp.defect_control_rates:theta_rate']

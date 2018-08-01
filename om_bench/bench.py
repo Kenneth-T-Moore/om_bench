@@ -13,7 +13,8 @@ import numpy as np
 
 from openmdao.core.problem import Problem
 
-from om_bench.templates import qsub_template, run_template, qsub_template_single_file, qsub_template_amd
+from om_bench.templates import qsub_template, run_template, qsub_template_single_file, \
+     qsub_template_amd, run_sub_timing_template
 
 
 class Bench(object):
@@ -119,6 +120,9 @@ class Bench(object):
         self.ln_wrt = None
 
         self.base_dir = os.getcwd()
+
+        # Special mode for gathering even more detailed timing info.
+        self.sub_timing = False
 
     def setup(self, problem, ndv, nstate, nproc, flag):
         """
@@ -365,16 +369,28 @@ class Bench(object):
             t5 = 0.0
 
         if self.time_linear:
+            if self.sub_timing:
+                prob.model.linear_solver.time_lu_fact = 0
+                prob.model.linear_solver.time_lu_solve = 0
             t2 = time()
             prob.compute_totals(of=self.ln_of, wrt=self.ln_wrt, return_format='dict')
             t3 = time() - t2
             print("Linear Execution complete:", t3, 'sec')
+            if self.sub_timing:
+                t3a = prob.model.linear_solver.time_lu_fact
+                t3b = prob.model.linear_solver.time_lu_solve
+                t3c = prob.total_jac.time_linearize_sys
+                t3d = prob.total_jac.time_lienarize_solver
+                t3e = prob.total_jac.time_solve
         else:
             t3 = 0.0
 
         self.post_run(prob, ndv, nstate, nproc, flag)
 
-        return t1, t3, t5
+        if self.sub_timing and self.time_linear:
+            return t1, t3, t5, t3a, t3b, t3c, t3d, t3e
+        else:
+            return t1, t3, t5
 
     def _prepare_run_script(self, ndv, nstate, nproc, flag, average, name):
         """
@@ -395,7 +411,11 @@ class Bench(object):
         name : string
             Unique filename for the output data.
         """
-        tp = run_template
+        if self.sub_timing:
+            tp = run_sub_timing_template
+        else:
+            tp = run_template
+
         tp = tp.replace('<ndv>', str(ndv))
         tp = tp.replace('<nstate>', str(nstate))
         tp = tp.replace('<nproc>', str(nproc))
