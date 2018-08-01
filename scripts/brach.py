@@ -104,8 +104,8 @@ if __name__ == "__main__":
     bench.ln_of  = ['phase0.time', 'phase0.collocation_constraint.defects:y', 'phase0.collocation_constraint.defects:x', 'phase0.collocation_constraint.defects:v', 'phase0.continuity_comp.defect_controls:theta', 'phase0.continuity_comp.defect_control_rates:theta_rate']
     bench.ln_wrt = ['phase0.t_duration', 'phase0.controls:theta', 'phase0.states:y', 'phase0.states:x', 'phase0.states:v']
 
-    bench.run_benchmark()
-    #bench.run_benchmark_mpi(walltime=8)
+    #bench.run_benchmark()
+    bench.run_benchmark_mpi(walltime=8)
 
 
 
