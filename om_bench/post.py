@@ -22,6 +22,8 @@ class BenchPost(object):
         # In this mode, we want to do a three way comparison.
         self.special_plot_driver_on_linear = False
 
+        self.equal_axis = False
+
     def post_process(self, filename):
         """
         Read benchmark data and make scaling plots.
@@ -98,6 +100,8 @@ class BenchPost(object):
                 plt.ylabel('Nonlinear Solve: Normalized Time')
                 plt.title(title)
                 plt.grid(True)
+                if self.equal_axis:
+                    plt.axis('equal')
                 plt.legend(['Default', flagtxt], loc=0)
                 plt.savefig("%s_%s_%s.png" % (name, mode, 'nl'))
 
@@ -110,6 +114,8 @@ class BenchPost(object):
                 plt.ylabel('Compute Totals: Normalized Time')
                 plt.title(title)
                 plt.grid(True)
+                if self.equal_axis:
+                    plt.axis('equal')
                 plt.legend(['Default', flagtxt], loc=0)
                 plt.savefig("%s_%s_%s.png" % (name, mode, 'ln'))
 
@@ -122,6 +128,8 @@ class BenchPost(object):
                 plt.ylabel(self.title_driver + ': Normalized Time')
                 plt.title(title)
                 plt.grid(True)
+                if self.equal_axis:
+                    plt.axis('equal')
                 plt.legend(['Default', flagtxt], loc=0)
                 plt.savefig("%s_%s_%s.png" % (name, mode, 'drv'))
 
@@ -141,6 +149,8 @@ class BenchPost(object):
                 plt.ylabel('Normalized Time')
                 plt.title(title)
                 plt.grid(True)
+                if self.equal_axis:
+                    plt.axis('equal')
                 plt.legend(['Compute Totals', 'Compute Totals: ' + flagtxt, self.title_driver], loc=0)
                 plt.savefig("%s_%s_%s.png" % (name, mode, 'spec1'))
 
@@ -156,6 +166,8 @@ class BenchPost(object):
                 plt.ylabel('Nonlinear Solve: Normalized Time')
                 plt.title(title)
                 plt.grid(True)
+                if self.equal_axis:
+                    plt.axis('equal')
                 plt.savefig("%s_%s_%s.png" % (name, mode, 'nl'))
 
             if ln:
@@ -166,6 +178,8 @@ class BenchPost(object):
                 plt.ylabel('Compute Totals: Normalized Time')
                 plt.title(title)
                 plt.grid(True)
+                if self.equal_axis:
+                    plt.axis('equal')
                 plt.savefig("%s_%s_%s.png" % (name, mode, 'ln'))
 
                 # For procs, we also view the time/proc as a function of number of procs.
@@ -177,6 +191,8 @@ class BenchPost(object):
                     plt.ylabel('Compute Totals: Normalized Time per Processor')
                     plt.title(title)
                     plt.grid(True)
+                    if self.equal_axis:
+                        plt.axis('equal')
                     plt.savefig("%s_%s_%s_per_proc.png" % (name, mode, 'ln'))
 
         plt.show()
