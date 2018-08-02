@@ -123,6 +123,7 @@ if __name__ == "__main__":
     bench.time_driver = True
     bench.single_batch = True
     bench.auto_queue_submit = False
+    bench.sub_timing = True
 
     # Hardcode of/wrt to remove linear constraints form consideration.
     bench.ln_of = ['phase0.time', 'phase0.collocation_constraint.defects:h', 'phase0.collocation_constraint.defects:gam', 'phase0.collocation_constraint.defects:r', 'phase0.collocation_constraint.defects:m', 'phase0.collocation_constraint.defects:v', 'phase0.continuity_comp.defect_control_rates:alpha_rate', 'phase0.boundary_constraints.final_value:h', 'phase0.boundary_constraints.final_value:gam', 'phase0.boundary_constraints.final_value:mach', 'phase0.path_constraints.path:h', 'phase0.path_constraints.path:mach']
