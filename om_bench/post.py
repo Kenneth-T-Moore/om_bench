@@ -247,6 +247,7 @@ def assemble_mpi_results():
         av.add(int(parts[4]))
 
     data = []
+    sub_timing = False
     for idv in sorted(dv):
         for istate in sorted(state):
             for iproc in sorted(proc):
@@ -269,11 +270,40 @@ def assemble_mpi_results():
                         t3_sum += t3
                         t5_sum += t5
 
+                        if len(parts) > 3:
+                            if not sub_timing:
+                                t3a_sum = 0.0
+                                t3b_sum = 0.0
+                                t3c_sum = 0.0
+                                t3d_sum = 0.0
+                                t3e_sum = 0.0
+                                sub_timing = True
+
+                            t3a = float(parts[3].strip())
+                            t3b = float(parts[4].strip())
+                            t3c = float(parts[5].strip())
+                            t3d = float(parts[6].strip())
+                            t3e = float(parts[7].strip())
+
+                            t3a_sum += t3a
+                            t3b_sum += t3b
+                            t3c_sum += t3c
+                            t3d_sum += t3d
+                            t3e_sum += t3e
+
                     t1av = t1_sum / (iav + 1)
                     t3av = t3_sum / (iav + 1)
                     t5av = t5_sum / (iav + 1)
 
-                    data.append((idv, istate, iproc, iflag, t1av, t3av, t5av))
+                    if sub_timing:
+                        t3aav = t3a_sum / (iav + 1)
+                        t3bav = t3b_sum / (iav + 1)
+                        t3cav = t3c_sum / (iav + 1)
+                        t3dav = t3d_sum / (iav + 1)
+                        t3eav = t3e_sum / (iav + 1)
+
+                    data.append((idv, istate, iproc, iflag, t1av, t3av, t5av,
+                                 t3aav, t3bav, t3cav, t3dav, t3eav))
 
     filename = '%s_%s_%s.dat' % (name, mode, op)
 
@@ -285,9 +315,14 @@ def assemble_mpi_results():
     outfile.write('%s, %s, %s' % (nl, ln, drv))
     outfile.write('\n')
 
-    for ndv, nstate, nproc, nflag, t1, t3, t5 in data:
-        outfile.write('%d, %d, %d, %s, %f, %f, %f' % (ndv, nstate, nproc, nflag, t1, t3, t5))
-        outfile.write('\n')
+    if sub_timing:
+        for ndv, nstate, nproc, nflag, t1, t3, t5, t3a, t3b, t3c, t3d, t3e in data:
+            outfile.write('%d, %d, %d, %s, %f, %f, %f, %f, %f, %f, %f, %f' % (ndv, nstate, nproc, nflag, t1, t3, t5, t3a, t3b, t3c, t3d, t3e))
+            outfile.write('\n')
+    else:
+        for ndv, nstate, nproc, nflag, t1, t3, t5 in data:
+            outfile.write('%d, %d, %d, %s, %f, %f, %f' % (ndv, nstate, nproc, nflag, t1, t3, t5))
+            outfile.write('\n')
     outfile.close()
 
     print("done")
