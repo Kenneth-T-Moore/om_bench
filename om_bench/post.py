@@ -247,7 +247,6 @@ def assemble_mpi_results():
         av.add(int(parts[4]))
 
     data = []
-    sub_timing = False
     for idv in sorted(dv):
         for istate in sorted(state):
             for iproc in sorted(proc):
@@ -256,6 +255,7 @@ def assemble_mpi_results():
                     t1_sum = 0.0
                     t3_sum = 0.0
                     t5_sum = 0.0
+                    sub_timing = False
                     for iav in av:
                         filename = stem + '_%s_%s_%s_%s_%s.dat' % (idv, istate, iproc, iflag, iav)
                         infile = open(filename, 'r')
