@@ -217,17 +217,43 @@ class Bench(object):
                     t1_sum = 0.0
                     t3_sum = 0.0
                     t5_sum = 0.0
+                    if self.sub_timing:
+                        t3a_sum = t3b_sum = t3c_sum = t3d_sum = t3e_sum = 0.0
+
                     for j in range(self.num_averages):
-                        t1, t3, t5 = self._run_nl_ln_drv(ndv, nstate, nproc, flag)
-                        t1_sum += t1
-                        t3_sum += t3
-                        t5_sum += t5
+                        if self.sub_timing:
+                            t1, t3, t5, t3a, t3b, t3c, t3d, t3e = self._run_nl_ln_drv(ndv, nstate, nproc, flag)
+                            t1_sum += t1
+                            t3_sum += t3
+                            t5_sum += t5
+                            t3a_sum += t3a
+                            t3b_sum += t3b
+                            t3c_sum += t3c
+                            t3d_sum += t3d
+                            t3e_sum += t3e
+
+                        else:
+                            t1, t3, t5 = self._run_nl_ln_drv(ndv, nstate, nproc, flag)
+                            t1_sum += t1
+                            t3_sum += t3
+                            t5_sum += t5
 
                     t1_av = t1_sum / (j + 1)
                     t3_av = t3_sum / (j + 1)
                     t5_av = t5_sum / (j + 1)
 
-                    data.append((ndv, nstate, nproc, flag, t1_av, t3_av, t5_av))
+                    if self.sub_timing:
+                        t3a_av = t3a_sum / (j + 1)
+                        t3b_av = t3b_sum / (j + 1)
+                        t3c_av = t3c_sum / (j + 1)
+                        t3d_av = t3d_sum / (j + 1)
+                        t3e_av = t3e_sum / (j + 1)
+
+                        data.append((ndv, nstate, nproc, flag, t1_av, t3_av, t5_av, t3a_av,
+                                     t3b_av, t3c_av, t3d_av, t3e_av))
+
+                    else:
+                        data.append((ndv, nstate, nproc, flag, t1_av, t3_av, t5_av))
 
         os.chdir(self.base_dir)
 
@@ -252,9 +278,15 @@ class Bench(object):
         outfile.write('%s, %s, %s' % (self.time_nonlinear, self.time_linear, self.time_driver))
         outfile.write('\n')
 
-        for ndv, nstate, nproc, flag, t1, t3, t5 in data:
-            outfile.write('%d, %d, %d, %s, %f, %f, %f' % (ndv, nstate, nproc, str(flag), t1, t3, t5))
-            outfile.write('\n')
+        if self.sub_timing:
+            for ndv, nstate, nproc, flag, t1, t3, t5, t3a, t3b, t3c, t3d, t3e in data:
+                outfile.write('%d, %d, %d, %s, %f, %f, %f, %f, %f, %f, %f, %f' % (ndv, nstate, nproc, str(flag), t1, t3, t5, t3a, t3b, t3c, t3d, t3e))
+                outfile.write('\n')
+        else:
+            for ndv, nstate, nproc, flag, t1, t3, t5 in data:
+                outfile.write('%d, %d, %d, %s, %f, %f, %f' % (ndv, nstate, nproc, str(flag), t1, t3, t5))
+                outfile.write('\n')
+
         outfile.close()
 
     def run_benchmark_mpi(self, walltime=4):

@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 
 #matplotlib.use('Agg')
 
-filename = 'minTimeClimb_state_nl_ln_drv_detail.dat'
+filename = 'minTimeClimb_state_nl_ln_drv_paper_detail.dat'
 
 flagtxt = "Simultaneous Derivatives"
 title_driver = "Compute Coloring"

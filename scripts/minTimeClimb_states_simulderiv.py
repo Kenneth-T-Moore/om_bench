@@ -113,12 +113,12 @@ class MyBench(Bench):
 if __name__ == "__main__":
 
     desvars = [1]
-    states = [1, 2, 4, 6, 12, 24, 48, 100, 200, 500]
+    states = [1, 2, 4, 6, 12, 24, 48, 100, 200]
     states = [item * 10 for item in states]
     procs = [1]
 
     bench = MyBench(desvars, states, procs, mode='auto', name='minTimeClimb', use_flag=True)
-    bench.num_averages = 1
+    bench.num_averages = 2
     bench.time_linear = True
     bench.time_driver = True
     bench.single_batch = True
@@ -129,8 +129,8 @@ if __name__ == "__main__":
     bench.ln_of = ['phase0.time', 'phase0.collocation_constraint.defects:h', 'phase0.collocation_constraint.defects:gam', 'phase0.collocation_constraint.defects:r', 'phase0.collocation_constraint.defects:m', 'phase0.collocation_constraint.defects:v', 'phase0.continuity_comp.defect_control_rates:alpha_rate', 'phase0.boundary_constraints.final_value:h', 'phase0.boundary_constraints.final_value:gam', 'phase0.boundary_constraints.final_value:mach', 'phase0.path_constraints.path:h', 'phase0.path_constraints.path:mach']
     bench.ln_wrt = ['phase0.t_duration', 'phase0.controls:alpha', 'phase0.states:h', 'phase0.states:gam', 'phase0.states:r', 'phase0.states:m', 'phase0.states:v']
 
-    #bench.run_benchmark()
-    bench.run_benchmark_mpi(walltime=8)
+    bench.run_benchmark()
+    #bench.run_benchmark_mpi(walltime=8)
 
 
 
